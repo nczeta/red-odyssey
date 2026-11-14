@@ -93,7 +93,7 @@ if __name__ == "__main__":
     print(np.count_nonzero(valid_map)/valid_map.size)
 
     # compute the path
-    path, length = find_path(g, T0, dem, valid_map, (100, 100), (4000, 700))
+    path, length = find_path(g, T0, dem, valid_map, (100, 100), (4000, 4000))
     print(path, length)
 
     # displays the map
