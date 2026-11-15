@@ -122,6 +122,10 @@ npm run dev
 
 Vite prints a local address (usually `http://localhost:5173`). The app has three pages: the landing page (`index.html`), the explorer (`app.html`) and this documentation (`project.html`).
 
+The Explorer's **2D / 3D** toggle switches between OpenLayers and a standalone Jezero terrain model rendered with `@google/model-viewer`. The viewer and GLB load on the first switch to 3D. Drag to rotate, right-drag or use two fingers to pan, and scroll or pinch to zoom; the reset control restores the initial framing. Switching back preserves map layers, route endpoints and the map view, and refreshes the viewport size.
+
+The model is `frontend/public/models/jezero-crater-3d.glb`; its URL is configured in `appConfig.terrain.sourceUrl` in `frontend/src/config/app.js`. Its metadata records 2× height exaggeration, unverified physical vertical scale and a synthetic display base. Map layers and routes apply to the 2D view; the viewer does not register the GLB against the map or synchronize coordinates.
+
 To create a production build and preview it:
 
 ```bash
