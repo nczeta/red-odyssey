@@ -3,10 +3,9 @@ from skimage.graph import route_through_array
 import matplotlib.pyplot as plt
 from itertools import permutations
 import math
+from pathlib import Path
 
 from backend.dem import load_dem
-
-dem = load_dem("../assets/M20_JezeroCrater_CTXDEM_20m.tif")  # load the dem from the file
 
 MAX_SLOPE = 20.0
 G_MAX = np.tan(np.radians(MAX_SLOPE))  # max tan
@@ -288,7 +287,7 @@ def smooth_path(path, mult, res, max_lookahead=48):
 
 if __name__ == "__main__":
     # get the dem from the geotiff image
-    dem = load_dem("../assets/M20_JezeroCrater_CTXDEM_20m.tif")
+    dem = load_dem(Path(__file__).resolve().parents[1] / "assets/M20_JezeroCrater_CTXDEM_20m.tif")
 
     # compute the gradient of the whole dem
     g = compute_slope(dem)
