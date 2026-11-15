@@ -71,9 +71,9 @@ export function createMap(config, onSelect) {
   };
   const observer = new ResizeObserver(updateSize);
   observer.observe(document.querySelector('#map-region'));
-  const setMarkers = (selected, start, end) => {
+  const setMarkers = (selected, start, end, waypoints = []) => {
     selectionSource.clear();
-    for (const [coordinate, label, color] of [[selected, '', '#D9C4AC'], [start, 'A', '#D38B6E'], [end, 'B', '#D9C4AC']]) {
+    for (const [coordinate, label, color] of [[selected, '', '#D9C4AC'], [start, 'A', '#D38B6E'], ...waypoints.map((point, i) => [point, String(i + 1), '#D9C4AC']), [end, 'B', '#D9C4AC']]) {
       if (!coordinate) continue;
       const feature = new Feature(new Point(coordinate));
       feature.setStyle(new Style({

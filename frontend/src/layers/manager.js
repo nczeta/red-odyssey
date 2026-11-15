@@ -10,6 +10,7 @@ import { Style, Stroke, Fill, Circle as CircleStyle } from 'ol/style.js';
 import { createCogLayer } from './cog.js';
 import { createContourLayer } from './contours.js';
 import { createGeologyLayer } from './geology.js';
+import { getRouteStyle } from './routes.js';
 
 export function spatialPair(crs, viewCrs) {
   if (!crs) throw new Error('A source CRS must be configured explicitly.');
@@ -97,7 +98,14 @@ export class LayerManager extends EventTarget {
       layer: null, state: config.lazy && config.sourceUrl ? 'configured' : 'unavailable', error: null,
     });
   }
-  notify() { this.dispatchEvent(new Event('change')); }
+  notify() {
+    const route = this.entries.get('routes')?.layer;
+    if (route) {
+      const style = getRouteStyle(this.entries.values());
+      if (route.getStyle() !== style) route.setStyle(style);
+    }
+    this.dispatchEvent(new Event('change'));
+  }
   get(id) {
     const entry = this.entries.get(id);
     if (!entry) throw new Error(`Unknown layer: ${id}.`);

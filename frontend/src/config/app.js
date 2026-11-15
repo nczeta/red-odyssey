@@ -22,9 +22,9 @@ export const appConfig = {
     registerMarsProjection();
   },
   api: {
-    routeUrl: null,
-    responseCrs: null,
-    timeoutMs: 30000,
+    routeUrl: import.meta.env?.VITE_ROUTE_API_URL || '/api/route',
+    responseCrs: MARS_CRS,
+    timeoutMs: 300000,
   },
 };
 

@@ -1,6 +1,6 @@
 import { appConfig, layerConfig } from './config/app.js';
 import { initializeLayout } from './components/layout.js';
-import { initializeLayers, renderAnalysis, formatPoint } from './components/panels.js';
+import { initializeLayers, renderAnalysis, renderWaypoints, formatPoint } from './components/panels.js';
 import { createMap } from './map/createMap.js';
 import { LayerManager } from './layers/manager.js';
 import { requestRoute } from './services/api.js';
@@ -10,7 +10,7 @@ import { initializeTerrain } from './components/terrain.js';
 const root = document.querySelector('#app');
 const state = {
   tool: null, selected: null, feature: null,
-  route: { start: null, end: null, choosing: null, status: 'idle', metrics: null, error: null },
+  route: { start: null, end: null, waypoints: [], reorder: true, order: null, choosing: null, status: 'idle', metrics: null, error: null },
 };
 const $ = selector => document.querySelector(selector);
 const announce = message => { $('#live-status').textContent = message; };
@@ -21,10 +21,18 @@ const mapController = createMap(appConfig, (coordinate, hit) => {
   if (state.tool === 'route' && state.route.choosing) {
     cancelRoute();
     const endpoint = state.route.choosing;
-    state.route[endpoint] = [...coordinate];
+    let label;
+    if (endpoint.startsWith('waypoint:')) {
+      const index = endpoint === 'waypoint:new' ? state.route.waypoints.length : Number(endpoint.split(':')[1]);
+      state.route.waypoints[index] = [...coordinate];
+      label = `Stop ${index + 1}`;
+    } else {
+      state.route[endpoint] = [...coordinate];
+      label = endpoint === 'start' ? 'Starting point' : 'Destination';
+    }
     state.route.status = 'selecting';
     state.route.choosing = endpoint === 'start' && !state.route.end ? 'end' : null;
-    announce(`${endpoint === 'start' ? 'Starting point' : 'Destination'} placed. ${state.route.choosing ? 'Select a destination.' : `Endpoints are in ${appConfig.spatial.code}.`}`);
+    announce(`${label} placed. ${state.route.choosing ? 'Select a destination.' : `Points are in ${appConfig.spatial.code}.`}`);
   } else if (hit?.layer.get('registryId') === 'geology') {
     state.selected = [...coordinate];
     state.feature = hit ? { id: hit.layer.get('registryId'), properties: hit.feature.getProperties(), sourceName: hit.layer.get('datasetName') } : null;
@@ -49,6 +57,8 @@ function cancelRoute() {
   requestController = null;
   state.route.metrics = null;
   state.route.error = null;
+  state.route.order = null;
+  state.route.status = 'selecting';
   if (manager.get('routes').layer && !manager.get('routes').config.sourceUrl) manager.clear('routes');
 }
 
@@ -64,17 +74,22 @@ function render() {
     $(`#${endpoint}-value`).textContent = formatPoint(route[endpoint]) || 'Click to place on map';
     $(`#set-${endpoint}`).setAttribute('aria-pressed', String(route.choosing === endpoint));
   }
-  $('#clear-route').disabled = !route.start && !route.end;
+  renderWaypoints(route);
+  $('#add-waypoint').disabled = route.waypoints.length >= 8;
+  $('#add-waypoint').setAttribute('aria-pressed', String(route.choosing === 'waypoint:new'));
+  $('#reorder-waypoints').checked = route.reorder;
+  $('#clear-route').disabled = !route.start && !route.end && !route.waypoints.length;
   const connected = !appConfig.spatial.local && appConfig.api.routeUrl && appConfig.api.responseCrs;
   $('#calculate-route').disabled = !connected || !route.start || !route.end || route.status === 'loading';
   $('#route-help').textContent = connected ? 'Coordinates are sent in the configured map CRS.' : 'Routing requires verified terrain data and a connected backend.';
   const hint = $('#map-action-hint');
   hint.hidden = state.tool !== 'route' || !route.choosing;
-  hint.textContent = `Select ${route.choosing === 'start' ? 'starting point A' : 'destination B'} · Click the map or press Enter at its center`;
+  const pointLabel = route.choosing?.startsWith('waypoint:') ? `stop ${route.choosing === 'waypoint:new' ? route.waypoints.length + 1 : Number(route.choosing.split(':')[1]) + 1}` : route.choosing === 'start' ? 'starting point A' : 'destination B';
+  hint.textContent = `Select ${pointLabel} · Click the map or press Enter at its center`;
   $('#map').classList.toggle('placing-endpoint', state.tool === 'route' && Boolean(route.choosing));
   // Make space for the selection marker while no visible data layer is ready.
-  $('#map-empty').classList.toggle('has-selection', Boolean(state.selected || route.start || route.end));
-  mapController.setMarkers(state.selected, route.start, route.end);
+  $('#map-empty').classList.toggle('has-selection', Boolean(state.selected || route.start || route.end || route.waypoints.length));
+  mapController.setMarkers(state.selected, route.start, route.end, route.waypoints);
   renderAnalysis(state, appConfig);
 }
 
@@ -95,10 +110,44 @@ for (const endpoint of ['start', 'end']) $(`#set-${endpoint}`).addEventListener(
   layout.closeDrawers();
   $('#map').focus({ preventScroll: true });
 });
+$('#add-waypoint').addEventListener('click', () => {
+  if (state.route.waypoints.length >= 8) return;
+  terrain.setMode('2d');
+  state.route.choosing = state.route.choosing === 'waypoint:new' ? null : 'waypoint:new';
+  render();
+  layout.closeDrawers();
+  $('#map').focus({ preventScroll: true });
+  announce(state.route.choosing ? 'Select an intermediate stop on the map.' : 'Stop placement cancelled.');
+});
+$('#route-waypoints').addEventListener('click', event => {
+  const button = event.target.closest('button');
+  if (!button) return;
+  terrain.setMode('2d');
+  if (button.dataset.removeWaypoint !== undefined) {
+    cancelRoute();
+    state.route.waypoints.splice(Number(button.dataset.removeWaypoint), 1);
+    state.route.choosing = null;
+    render();
+    $('#add-waypoint').focus();
+    announce('Stop removed. Calculate the route again.');
+  } else if (button.dataset.waypoint !== undefined) {
+    const choosing = `waypoint:${button.dataset.waypoint}`;
+    state.route.choosing = state.route.choosing === choosing ? null : choosing;
+    render();
+    layout.closeDrawers();
+    $('#map').focus({ preventScroll: true });
+  }
+});
+$('#reorder-waypoints').addEventListener('change', event => {
+  cancelRoute();
+  state.route.reorder = event.target.checked;
+  render();
+  announce(state.route.reorder ? 'Intermediate stops will be reordered. Start and destination stay fixed.' : 'Stops will be visited in the order you added them.');
+});
 $('#clear-route').addEventListener('click', () => {
   terrain.setMode('2d');
   cancelRoute();
-  state.route = { start: null, end: null, choosing: 'start', status: 'idle', metrics: null, error: null };
+  state.route = { start: null, end: null, waypoints: [], reorder: state.route.reorder, order: null, choosing: 'start', status: 'idle', metrics: null, error: null };
   render();
   layout.closeDrawers();
   announce('Endpoints cleared. Select a new starting point.');
@@ -111,10 +160,11 @@ $('#calculate-route').addEventListener('click', async () => {
   state.route.status = 'loading';
   render();
   try {
-    const result = await requestRoute({ start: state.route.start, end: state.route.end, crs: appConfig.spatial.code, api: appConfig.api, signal: controller.signal });
+    const result = await requestRoute({ start: state.route.start, end: state.route.end, waypoints: state.route.waypoints, reorder: state.route.reorder, crs: appConfig.spatial.code, api: appConfig.api, signal: controller.signal });
     if (controller.signal.aborted) return;
     manager.setGeoJSON('routes', result.route, result.crs);
     state.route.metrics = result.metrics;
+    state.route.order = result.waypointOrder;
     state.route.status = 'ready';
     announce('Route loaded from the configured service.');
   } catch (error) {
@@ -138,22 +188,16 @@ manager.addEventListener('change', () => {
   const empty = $('#map-empty');
   empty.querySelector('h3').textContent = loading ? 'Loading Jezero map' : failed ? 'Map unavailable' : 'Explore Jezero Crater';
   empty.querySelector('p').textContent = loading ? `Loading ${loading.config.name}.` : failed?.error || 'Enable a map in Map Layers to view the surface.';
-  $('.tag-secondary').textContent = connected ? 'DATA CONNECTED' : 'NO DATA CONNECTED';
   $('.left-sidebar .sidebar-footer > span:last-child').textContent = connected ? 'Geospatial data connected' : 'Awaiting geospatial data';
   if (!appConfig.spatial.local) $('#map-spatial-label').textContent = appConfig.spatial.code;
 });
 
-const dialog = $('#info-dialog');
 const selectionDialog = $('#selection-dialog');
 $('#close-selection').addEventListener('click', () => selectionDialog.close());
-$('#project-info').addEventListener('click', () => dialog.showModal());
-$('#close-info').addEventListener('click', () => dialog.close());
-dialog.addEventListener('click', event => { if (event.target === dialog) { const bounds = dialog.getBoundingClientRect(); if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) dialog.close(); } });
 
 render();
 manager.loadConfigured();
 if (!appConfig.spatial.local) {
-  $('.workspace-tag > span:nth-child(2)').textContent = 'SPATIAL WORKSPACE';
   $('#map-spatial-label').textContent = appConfig.spatial.code;
   $('.tool-tag').textContent = 'GIS';
   $('#map').setAttribute('aria-label', `Map in ${appConfig.spatial.code}. Arrow keys to pan. Plus and minus to zoom. Enter to place an active route endpoint.`);

@@ -2,6 +2,12 @@ import { icon, escapeHtml } from './icons.js';
 
 export const formatPoint = point => point ? `${point[0].toFixed(1)}, ${point[1].toFixed(1)}` : null;
 
+export function renderWaypoints(route) {
+  const list = document.querySelector('#route-waypoints');
+  const markup = route.waypoints.map((point, index) => `<div class="waypoint-row"><button class="endpoint-button" data-waypoint="${index}" aria-pressed="${route.choosing === `waypoint:${index}`}"><span class="point-label">${index + 1}</span><span><strong>Stop ${index + 1}</strong><small>${escapeHtml(formatPoint(point))}</small></span>${icon('target')}</button><button class="waypoint-remove" data-remove-waypoint="${index}" aria-label="Remove stop ${index + 1}">${icon('close')}</button></div>`).join('');
+  if (list.innerHTML !== markup) list.innerHTML = markup;
+}
+
 export function initializeLayers(manager) {
   const list = document.querySelector('#layer-list');
   const rows = new Map();
@@ -37,6 +43,9 @@ export function renderAnalysis(state, config) {
   const local = config.spatial.local;
   const coordinates = formatPoint(state.selected);
   const metrics = state.route.metrics;
+  const waypoints = state.route.waypoints || [];
+  const order = state.route.order || waypoints.map((_, index) => index);
+  const stops = order.map(index => `<div><span class="point-label">${index + 1}</span><span>${escapeHtml(formatPoint(waypoints[index]))}</span></div>`).join('');
   const metricRows = metrics && typeof metrics === 'object' ? Object.entries(metrics)
     .filter(([, metric]) => Number.isFinite(metric?.value) && typeof metric?.units === 'string' && metric.units.length)
     .map(([name, metric]) => `<div class="metric-row"><span>${escapeHtml(name)}</span><strong>${escapeHtml(metric.value)} <small>${escapeHtml(metric.units)}</small></strong></div>`).join('') : '';
@@ -48,6 +57,6 @@ export function renderAnalysis(state, config) {
     properties.sort(([first], [second]) => rank(first) - rank(second));
   }
   document.querySelector('#location-result').innerHTML = `${coordinates ? `<div class="coordinate-display"><div><span>X</span><strong>${escapeHtml(state.selected[0].toFixed(1))}</strong></div><div><span>Y</span><strong>${escapeHtml(state.selected[1].toFixed(1))}</strong></div></div><p class="location-help">${local ? 'Abstract local units · Not georeferenced' : escapeHtml(config.spatial.code)}</p>` : `<div class="selection-empty">${icon('target')}<span>Select a location</span></div><p class="location-help">Select a geological unit on the map to inspect.</p>`}`;
-  document.querySelector('#route-result').innerHTML = `${state.route.start || state.route.end ? `<div class="route-summary"><div><span class="point-label">A</span><span>${escapeHtml(formatPoint(state.route.start) || 'Select starting point')}</span></div><div><span class="point-label end">B</span><span>${escapeHtml(formatPoint(state.route.end) || 'Select destination')}</span></div></div><p class="small-copy ${state.route.status === 'error' ? 'error-copy' : ''}">${escapeHtml(state.route.error || ({ selecting: local ? 'Local endpoints only. No route calculated.' : `Endpoints in ${config.spatial.code}. No route calculated.`, loading: 'Requesting route from the configured service…', ready: 'Route supplied by the configured service.', idle: 'No route selected.' }[state.route.status]))}</p>${metricRows}` : `<p class="empty-line">No route selected</p><p class="small-copy">Set your endpoints in Route Planner.</p>`}`;
+  document.querySelector('#route-result').innerHTML = `${state.route.start || state.route.end || waypoints.length ? `<div class="route-summary"><div><span class="point-label">A</span><span>${escapeHtml(formatPoint(state.route.start) || 'Select starting point')}</span></div>${stops}<div><span class="point-label end">B</span><span>${escapeHtml(formatPoint(state.route.end) || 'Select destination')}</span></div></div><p class="small-copy ${state.route.status === 'error' ? 'error-copy' : ''}">${escapeHtml(state.route.error || ({ selecting: local ? 'Local endpoints only. No route calculated.' : `Endpoints in ${config.spatial.code}. No route calculated.`, loading: 'Requesting route from the configured service…', ready: 'Route supplied by the configured service.', idle: 'No route selected.' }[state.route.status]))}</p>${metricRows}` : `<p class="empty-line">No route selected</p><p class="small-copy">Set your endpoints in Route Planner.</p>`}`;
   document.querySelector('#scientific-result').innerHTML = `${properties.length ? `${state.feature.sourceName ? `<p class="small-copy">${escapeHtml(state.feature.sourceName)}</p>` : ''}<dl class="scientific-properties">${properties.map(([key, value]) => `<div><dt>${escapeHtml(key)}</dt><dd>${escapeHtml(value)}</dd></div>`).join('')}</dl>` : `<p class="empty-line">No feature selected</p><p class="small-copy">Select a geological unit to inspect its attributes.</p>`}`;
 }

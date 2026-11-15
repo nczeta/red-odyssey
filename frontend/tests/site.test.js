@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { Window } from 'happy-dom';
-import { renderAnalysis } from '../src/components/panels.js';
+import { renderAnalysis, renderWaypoints } from '../src/components/panels.js';
 import { initializeLayout, STORAGE_KEY, lockPageScroll } from '../src/components/layout.js';
 import { appConfig, layerConfig } from '../src/config/app.js';
 import { initializeLegend } from '../src/components/legend.js';
@@ -42,6 +42,22 @@ function explorer(t, options) {
   return { ...environment, root, layout, resizes: () => resizes };
 }
 
+test('intermediate stops can be selected or removed and the summary follows the returned order', t => {
+  const { doc } = explorer(t);
+  const route = { start: [0, 0], end: [10, 0], waypoints: [[8, 0], [3, 0]], choosing: 'waypoint:0', reorder: true, order: [1, 0], status: 'ready', metrics: null };
+  renderWaypoints(route);
+  assert.equal(doc.querySelector('[data-waypoint="0"]').getAttribute('aria-pressed'), 'true');
+  assert.equal(doc.querySelector('[data-waypoint="1"]').getAttribute('aria-pressed'), 'false');
+  assert.equal(doc.querySelector('[data-remove-waypoint="1"]').getAttribute('aria-label'), 'Remove stop 2');
+  assert.ok(doc.querySelector('#reorder-waypoints').checked);
+  assert.equal(doc.querySelector('#reorder-waypoints').getAttribute('role'), 'switch');
+  renderAnalysis({ selected: null, feature: null, route }, appConfig);
+  assert.deepEqual([...doc.querySelectorAll('.route-summary .point-label')].map(node => node.textContent), ['A', '2', '1', 'B']);
+  route.waypoints = [];
+  renderWaypoints(route);
+  assert.equal(doc.querySelectorAll('.waypoint-row').length, 0);
+});
+
 test('shared navigation uses real links, between the landing, Project and standalone app', t => {
   const { doc } = setup(t, { html: projectHtml });
   assert.equal(doc.querySelector('.nav-launch').getAttribute('href'), './app.html');
@@ -52,9 +68,9 @@ test('shared navigation uses real links, between the landing, Project and standa
 });
 
 test('public chrome and official logo are present without running JavaScript', async t => {
-  const logo = await readFile(new URL('../public/images/red-odyssey-logo.svg', import.meta.url), 'utf8');
+  const logo = await readFile(new URL('../public/images/logo_final.svg', import.meta.url), 'utf8');
   assert.match(logo, /<svg\b/);
-  assert.match(logo, /viewBox="0 0 180 180"/);
+  assert.match(logo, /viewBox="0 0 136\.666 183\.975"/);
   for (const html of [homeHtml, projectHtml, appHtml]) {
     const { doc } = setup(t, { html });
     const ids = [...doc.querySelectorAll('[id]')].map(element => element.id);
@@ -63,11 +79,11 @@ test('public chrome and official logo are present without running JavaScript', a
     assert.equal(doc.querySelectorAll('h1').length, 1);
     assert.ok(doc.querySelectorAll('img.official-logo').length > 0);
     for (const image of doc.querySelectorAll('img.official-logo')) {
-      assert.equal(image.getAttribute('src'), html === projectHtml ? '/images/red-odyssey-logo.svg' : '/images/red-odyssey-logo-white-isolines.svg');
+      assert.equal(image.getAttribute('src'), html === projectHtml ? '/images/logo_final.svg' : '/images/logo_final-light.svg');
     }
     assert.equal(doc.querySelectorAll('.site-header').length, html === appHtml ? 0 : 1);
     assert.equal(doc.querySelectorAll('.site-footer').length, html === appHtml ? 0 : 1);
-    assert.equal(doc.querySelector('link[rel="icon"][type="image/svg+xml"]').getAttribute('href'), '/images/red-odyssey-logo.svg');
+    assert.equal(doc.querySelector('link[rel="icon"][type="image/svg+xml"]').getAttribute('href'), '/favicon.svg?v=logo-final');
     assert.equal(doc.querySelectorAll('[data-icon], [data-site-header], [data-site-footer]').length, 0);
   }
   const png = await readFile(new URL('../public/favicon.png', import.meta.url));
