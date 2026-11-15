@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#201e1b">
+    <meta name="description" content="Explore the Martian surface through planetary data, terrain analysis and interactive route planning. Discover Red Odyssey and its OpenLayers explorer.">
+    <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="icon" type="image/svg+xml" sizes="any" href="/images/red-odyssey-logo.svg">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="stylesheet" href="/src/style.css">
+    <title>
+      Explorer — RED ODYSSEY
+    </title>
+  </head>
+  <body class="page-app">
+    <a class="skip-link" href="#map">Skip to map</a>
+    <main id="app" class="left-closed right-closed" aria-label="Martian Terrain Explorer">
+      <h1 class="visually-hidden">RED ODYSSEY — Interactive Explorer</h1>
+      <div class="workspace" role="group" aria-label="Terrain exploration dashboard">
+        <aside id="left-panel" class="sidebar left-sidebar" aria-label="Map layers and tools" inert="" aria-hidden="true">
+          <div class="panel-heading">
+            <div>
+              <span class="eyebrow">LAYER REGISTER</span>
+              <h3>Map Layers</h3>
+            </div>
+            <button id="close-left" class="icon-button tooltip" type="button" aria-label="Close map layers" data-tooltip="Close map layers" aria-controls="left-panel"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="M9 4v16m7-11-3 3 3 3"></path></svg></button>
+          </div>
+          <div class="panel-scroll">
+            <div class="section-caption">
+              <span>DATA LAYERS</span>
+              <span id="layer-count">0 / 8</span>
+            </div>
+            <div id="layer-list" class="layer-list"></div>
+            <div class="layer-note">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="8" ry="3"></ellipse><path d="M4 5v14c0 4 16 4 16 0V5M4 12c0 4 16 4 16 0"></path></svg>
+              <span>Dataset integration pending.<br>Sources &amp; resolution to be documented.</span>
+            </div>
+            <section class="tools-section" aria-labelledby="tools-title">
+              <div class="section-caption">
+                <h4 id="tools-title">EXPLORATION TOOLS</h4>
+              </div>
+              <button class="tool-button active" data-tool="explore" aria-pressed="true"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="m16 8-3 5-5 3 3-5 5-3Z"></path></svg><span>Explore</span><svg class="icon tool-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"></path></svg></button>
+              <button class="tool-button" data-tool="route" aria-pressed="false"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5" cy="5" r="2"></circle><circle cx="19" cy="19" r="2"></circle><path d="M7 5h9a4 4 0 0 1 0 8H8a3 3 0 0 0 0 6h9"></path></svg><span>Route Planner</span><span class="tool-tag">LOCAL</span></button>
+              <button class="tool-button" data-tool="sites" disabled="" aria-pressed="false" aria-describedby="sites-help"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 0 1 14 0Z"></path><circle cx="12" cy="10" r="2.5"></circle></svg><span>Scientific Sites</span><span class="unavailable-dot"></span></button>
+              <p id="sites-help" class="visually-hidden">Scientific sites require a configured dataset.</p>
+              <section id="route-planner" class="route-planner" aria-label="Route endpoints" hidden="">
+                <p class="small-copy">Place two endpoints in the local workspace. No terrain measurements are available.</p>
+                <button id="set-start" class="endpoint-button" aria-pressed="false"><span class="point-label">A</span><span><strong>Starting point</strong><small id="start-value">Click to place on map</small></span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="7"></circle><circle cx="12" cy="12" r="2"></circle><path d="M12 2v3m0 14v3M2 12h3m14 0h3"></path></svg></button>
+                <button id="set-end" class="endpoint-button" aria-pressed="false"><span class="point-label end">B</span><span><strong>Destination</strong><small id="end-value">Click to place on map</small></span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="7"></circle><circle cx="12" cy="12" r="2"></circle><path d="M12 2v3m0 14v3M2 12h3m14 0h3"></path></svg></button>
+                <button id="calculate-route" class="primary-button" disabled="" aria-describedby="route-help">Calculate route <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16m-6-6 6 6-6 6"></path></svg></button>
+                <p id="route-help" class="small-copy">Routing requires verified terrain data and a connected backend.</p>
+                <button id="clear-route" class="text-button" disabled="">Clear endpoints</button>
+              </section>
+            </section>
+          </div>
+          <footer class="sidebar-footer">
+            <span class="status-dot"></span>
+            <span>Awaiting geospatial data</span>
+          </footer>
+        </aside>
+        <section id="map-region" class="map-region" aria-label="Interactive map workspace">
+          <div id="map" tabindex="0" role="region" aria-label="Local abstract map. Use arrow keys to pan, plus and minus to zoom, and Enter to select the center." aria-describedby="map-instructions"></div>
+          <p id="map-instructions" class="visually-hidden">Not georeferenced. Drag to pan; use the zoom controls or scroll to zoom. Click to select a local position. No Mars surface datasets are loaded.</p>
+          <div class="map-topbar">
+            <div class="map-top-left">
+              <a class="workspace-home" href="./index.html" aria-label="Red Odyssey homepage" title="Return to homepage"><img class="official-logo workspace-mark" src="/images/red-odyssey-logo-white-isolines.svg" alt="" width="180" height="180"><span>RED ODYSSEY</span></a>
+              <button id="open-left" class="icon-button tooltip" type="button" aria-label="Open map layers" data-tooltip="Open map layers" aria-controls="left-panel" aria-expanded="false"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="M9 4v16m4-11 3 3-3 3"></path></svg></button>
+              <div class="workspace-tag">
+                <span class="status-dot"></span>
+                <span>LOCAL WORKSPACE</span>
+                <span class="tag-divider"></span>
+                <span class="tag-secondary">NO DATA CONNECTED</span>
+              </div>
+            </div>
+            <div class="map-top-right">
+              <button id="project-info" class="icon-button tooltip" type="button" aria-label="Workspace information" data-tooltip="Workspace information"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v6m0-10h.01"></path></svg></button>
+              <button id="open-right" class="icon-button tooltip" type="button" aria-label="Open analysis" data-tooltip="Open analysis" aria-controls="right-panel" aria-expanded="false"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="M15 4v16m-4-11-3 3 3 3"></path></svg></button>
+            </div>
+          </div>
+          <div id="map-empty" class="map-empty" aria-hidden="true">
+            <span class="map-plate-number">LOCAL / 01</span>
+            <h3>Terrain, yet to be revealed.</h3>
+            <p>Geospatial datasets pending integration.<br>This grid is an abstract coordinate space.</p>
+            <span class="map-empty-rule"></span>
+          </div>
+          <div id="map-action-hint" class="map-action-hint" role="status" hidden=""></div>
+          <div class="map-controls" role="group" aria-label="Map controls">
+            <button id="zoom-in" class="icon-button tooltip" type="button" aria-label="Zoom in" data-tooltip="Zoom in"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></button>
+            <button id="zoom-out" class="icon-button tooltip" type="button" aria-label="Zoom out" data-tooltip="Zoom out"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path></svg></button>
+            <span class="control-divider"></span>
+            <button id="reset-view" class="icon-button tooltip" type="button" aria-label="Reset view" data-tooltip="Reset view"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10a9 9 0 1 1 2 8M3 4v6h6"></path></svg></button>
+            <span class="control-divider"></span>
+            <button id="focus-map" class="icon-button tooltip" type="button" aria-label="Expand map" data-tooltip="Expand map" aria-pressed="false"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"></path></svg></button>
+          </div>
+          <button id="exit-focus" class="exit-focus" hidden=""><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h5V3m8 0v5h5M8 21v-5H3m18 0h-5v5"></path></svg><span>Back to dashboard</span><kbd>ESC</kbd></button>
+          <footer class="map-footer">
+            <div>
+              <span class="local-indicator"></span>
+              <span id="map-spatial-label">Local workspace <span class="footer-separator">/</span> Not georeferenced</span>
+            </div>
+            <span id="pointer-coordinates">X — &nbsp; Y — <span class="coordinate-unit">LOCAL</span></span>
+          </footer>
+        </section>
+        <aside id="right-panel" class="sidebar right-sidebar" aria-label="Location and route analysis" inert="" aria-hidden="true">
+          <div class="panel-heading">
+            <div>
+              <span class="eyebrow">FIELD NOTES</span>
+              <h3>Analysis</h3>
+            </div>
+            <button id="close-right" class="icon-button tooltip" type="button" aria-label="Close analysis" data-tooltip="Close analysis" aria-controls="right-panel"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="M15 4v16M8 9l3 3-3 3"></path></svg></button>
+          </div>
+          <div id="analysis-content" class="panel-scroll analysis-scroll">
+            <section class="analysis-section location-section">
+              <div class="section-caption">
+                <h4>SELECTED LOCATION</h4>
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="7"></circle><circle cx="12" cy="12" r="2"></circle><path d="M12 2v3m0 14v3M2 12h3m14 0h3"></path></svg>
+              </div>
+              <div id="location-result">
+                <div class="selection-empty">
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="7"></circle><circle cx="12" cy="12" r="2"></circle><path d="M12 2v3m0 14v3M2 12h3m14 0h3"></path></svg>
+                  <span>Select a location</span>
+                </div>
+                <p class="location-help">Click anywhere in the workspace to inspect.</p>
+              </div>
+            </section>
+            <section class="analysis-section terrain-section">
+              <div class="section-caption">
+                <h4>TERRAIN METRICS</h4>
+                <span class="section-tag">NO DATA</span>
+              </div>
+              <div class="metric-row">
+                <span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 20 7-15 4 8 3-5 5 12H3Z"></path><path d="m8 9 2 3 2-3"></path></svg>Elevation</span>
+                <strong class="no-data">
+                  —
+                </strong>
+              </div>
+              <div class="metric-row">
+                <span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 19 21 5v14H3Z"></path><path d="M14 19v-4m4 4v-7"></path></svg>Slope</span>
+                <strong class="no-data">
+                  —
+                </strong>
+              </div>
+              <div class="metric-row">
+                <span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 10 18H2L12 3Z"></path><path d="M12 9v5m0 3h.01"></path></svg>Terrain difficulty</span>
+                <strong class="no-data">
+                  —
+                </strong>
+              </div>
+              <p class="small-copy">No data available. Connect terrain datasets to enable analysis.</p>
+            </section>
+            <section class="analysis-section">
+              <div class="section-caption">
+                <h4>ROUTE INFORMATION</h4>
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5" cy="5" r="2"></circle><circle cx="19" cy="19" r="2"></circle><path d="M7 5h9a4 4 0 0 1 0 8H8a3 3 0 0 0 0 6h9"></path></svg>
+              </div>
+              <div id="route-result">
+                <p class="empty-line">No route selected</p>
+                <p class="small-copy">Set your endpoints in Route Planner.</p>
+              </div>
+            </section>
+            <section class="analysis-section">
+              <div class="section-caption">
+                <h4>ELEVATION PROFILE</h4>
+              </div>
+              <div class="profile-empty">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4v16h16M8 15l4-5 4 3 4-7"></path></svg>
+                <span>No profile data available</span>
+              </div>
+            </section>
+            <section class="analysis-section scientific-section">
+              <div class="section-caption">
+                <h4>SCIENTIFIC INFORMATION</h4>
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 0 1 14 0Z"></path><circle cx="12" cy="10" r="2.5"></circle></svg>
+              </div>
+              <div id="scientific-result">
+                <p class="empty-line">No site selected</p>
+                <p class="small-copy">Scientific context will appear when a site dataset is connected and a feature is selected.</p>
+              </div>
+            </section>
+          </div>
+          <footer class="sidebar-footer">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v6m0-10h.01"></path></svg>
+            <span>Measurements require spatial data</span>
+          </footer>
+        </aside>
+      </div>
+      <div id="live-status" class="visually-hidden" role="status" aria-live="polite"></div>
+      <dialog id="info-dialog" class="info-dialog" aria-labelledby="dialog-title">
+        <div class="dialog-header">
+          <span class="brand-symbol"><img class="official-logo workspace-mark" src="/images/red-odyssey-logo-white-isolines.svg" alt="" width="180" height="180"></span>
+          <button id="close-info" class="icon-button tooltip" type="button" aria-label="Close project information" data-tooltip="Close project information"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 6 12 12M6 18 18 6"></path></svg></button>
+        </div>
+        <span class="eyebrow">A WORKSPACE FOR DISCOVERY</span>
+        <h2 id="dialog-title">RED ODYSSEY</h2>
+        <p class="dialog-subtitle">Martian Terrain Explorer</p>
+        <p>A modular WebGIS frontend being developed for the NASA International Space Apps Challenge 2026. This is an independent project, without implied NASA endorsement.</p>
+        <div class="dialog-notice">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="8" ry="3"></ellipse><path d="M4 5v14c0 4 16 4 16 0V5M4 12c0 4 16 4 16 0"></path></svg>
+          <p>No planetary datasets are connected. The grid and coordinates are an abstract local workspace, not a representation of Mars. Terrain analysis and routing become available only after verified data and services are integrated.</p>
+        </div>
+        <p class="dialog-footnote">Built with OpenLayers · Designed for exploration</p>
+      </dialog>
+    </main>
+    <noscript><p class="app-noscript">JavaScript is required for the interactive map. <a href="./project.html">Read the project documentation</a> or <a href="./index.html">return home</a>.</p></noscript>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
