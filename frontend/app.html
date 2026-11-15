@@ -60,6 +60,25 @@
         <section id="map-region" class="map-region" aria-label="Interactive map workspace">
           <div id="map" tabindex="0" role="region" aria-label="Map in MARS. Use arrow keys to pan, plus and minus to zoom, and Enter to place an active route endpoint." aria-describedby="map-instructions"></div>
           <p id="map-instructions" class="visually-hidden">Drag to pan; use the zoom controls or scroll to zoom. Use Route Planner to place endpoints or click a geological unit to inspect it.</p>
+          <section id="terrain-view" class="terrain-view" aria-label="Jezero Crater 3D terrain" tabindex="-1" hidden inert>
+            <div id="terrain-model" class="terrain-model"></div>
+            <div id="terrain-status" class="terrain-status" role="status">
+              <span class="eyebrow">JEZERO CRATER / 3D</span>
+              <h3 id="terrain-status-title">Loading terrain</h3>
+              <p id="terrain-status-message">Preparing the 3D viewer.</p>
+              <progress id="terrain-progress" max="1" aria-label="Loading 3D terrain"></progress>
+              <div id="terrain-error-actions" class="terrain-error-actions" hidden>
+                <button id="terrain-retry" class="primary-button" type="button">Try again</button>
+                <button id="terrain-back" class="text-button" type="button">Return to 2D</button>
+              </div>
+            </div>
+            <div class="terrain-caption">
+              <span class="eyebrow">JEZERO CRATER / 3D TERRAIN</span>
+              <p>Drag to rotate · Right-drag or two fingers to pan · Scroll or pinch to zoom</p>
+              <p>2× height exaggeration · Physical vertical scale unverified</p>
+              <p>Map layers and routes apply in 2D.</p>
+            </div>
+          </section>
           <div class="map-topbar">
             <div class="map-top-left">
               <a class="workspace-home" href="./index.html" aria-label="Red Odyssey homepage" title="Return to homepage"><img class="official-logo workspace-mark" src="/images/red-odyssey-logo-white-isolines.svg" alt="" width="180" height="180"><span>RED ODYSSEY</span></a>
@@ -72,6 +91,10 @@
               </div>
             </div>
             <div class="map-top-right">
+              <div class="view-toggle" role="group" aria-label="Terrain visualization">
+                <button type="button" data-view-mode="2d" aria-pressed="true" aria-controls="map">2D</button>
+                <button type="button" data-view-mode="3d" aria-pressed="false" aria-controls="terrain-view">3D</button>
+              </div>
               <button id="project-info" class="icon-button tooltip" type="button" aria-label="Workspace information" data-tooltip="Workspace information"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v6m0-10h.01"></path></svg></button>
               <button id="open-right" class="icon-button tooltip" type="button" aria-label="Open map legend" data-tooltip="Open map legend" aria-controls="right-panel" aria-expanded="false"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="M15 4v16m-4-11-3 3 3 3"></path></svg></button>
             </div>
@@ -84,6 +107,7 @@
           </div>
           <div id="map-action-hint" class="map-action-hint" role="status" hidden=""></div>
           <div class="map-controls" role="group" aria-label="Map controls">
+            <button id="terrain-reset" class="icon-button tooltip" type="button" aria-label="Reset 3D view" data-tooltip="Reset 3D view" hidden><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10a9 9 0 1 1 2 8M3 4v6h6"></path></svg></button>
             <button id="zoom-in" class="icon-button tooltip" type="button" aria-label="Zoom in" data-tooltip="Zoom in"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></button>
             <button id="zoom-out" class="icon-button tooltip" type="button" aria-label="Zoom out" data-tooltip="Zoom out"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path></svg></button>
             <span class="control-divider"></span>

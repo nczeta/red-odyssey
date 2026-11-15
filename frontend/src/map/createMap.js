@@ -47,6 +47,7 @@ export function createMap(config, onSelect) {
     if (event.key === 'Enter') { event.preventDefault(); onSelect(view.getCenter()); }
   });
   document.querySelector('#map-region').addEventListener('pointerdown', event => {
+    if (target.inert) return;
     if (!event.target.closest('button, input, a')) target.focus({ preventScroll: true });
   });
   const motion = matchMedia('(prefers-reduced-motion: reduce)');

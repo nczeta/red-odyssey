@@ -180,6 +180,36 @@ svg { vertical-align: middle; }
 .map-region { position: relative; isolation: isolate; overflow: hidden; background: var(--map-surface); }
 #map { position: absolute; inset: 0; outline-offset: -3px !important; }
 #map.placing-endpoint { cursor: crosshair; }
+/* The map retains its dimensions and View while the standalone model is visible. */
+.is-3d #map { visibility: hidden; pointer-events: none; }
+.is-3d .map-empty, .is-3d .map-action-hint, .is-3d .map-footer { display: none; }
+.is-3d .map-controls > :not(#focus-map):not(#terrain-reset) { display: none; }
+.view-toggle { display: flex; pointer-events: auto; padding: 2px; background: var(--panel); border: 1px solid var(--border); border-radius: 2px; }
+.map-topbar .view-toggle button { min-width: 40px; min-height: 38px; padding: 0 8px; border: 0; background: transparent; color: var(--muted); font: 500 12px var(--mono); }
+.map-topbar .view-toggle button:hover { color: var(--text); background: var(--elevated); }
+.map-topbar .view-toggle button[aria-pressed="true"] { color: var(--sand); background: var(--accent-wash); box-shadow: inset 0 -2px var(--terracotta); }
+.terrain-view { position: absolute; inset: 0; background: var(--map-surface); outline-offset: -3px; }
+.terrain-view:focus-visible { outline: 2px solid var(--focus); }
+.terrain-model { position: absolute; inset: 70px 0 130px; }
+.terrain-model model-viewer { display: block; width: 100%; height: 100%; touch-action: none; --poster-color: transparent; }
+.terrain-model model-viewer:focus-visible { outline: 2px solid var(--focus); outline-offset: -3px; }
+.terrain-status { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: min(380px, calc(100% - 48px)); padding: 24px; background: var(--panel); border: 1px solid var(--border); }
+.terrain-status h3 { margin: 9px 0; color: var(--sand); font: 500 28px/1.2 var(--display); }
+.terrain-status p { font-size: 12px; color: var(--secondary); }
+.terrain-status progress { width: 100%; height: 4px; margin-top: 18px; accent-color: var(--terracotta); }
+.terrain-error-actions { display: flex; align-items: center; gap: 16px; margin-top: 18px; }
+.terrain-error-actions .primary-button { width: auto; margin: 0; }
+.terrain-caption { position: absolute; bottom: 20px; left: 24px; right: 80px; pointer-events: none; }
+.terrain-caption p { margin-top: 5px; color: var(--muted); font-size: 11px; line-height: 1.5; }
+.map-region { container-type: inline-size; }
+@container (max-width: 760px) { .map-topbar .workspace-tag { display: none; } }
+@media (max-width: 600px) {
+  .terrain-model { inset: 70px 0 190px; }
+  .terrain-caption { bottom: 16px; left: 16px; right: 16px; }
+  .terrain-caption p { font-size: 10px; }
+  .is-3d .map-controls { bottom: 134px; }
+  .is-focus.is-3d .map-controls { bottom: calc(134px + env(safe-area-inset-bottom)); }
+}
 .ol-viewport { width: 100%; height: 100%; position: relative; overflow: hidden; touch-action: none; }
 .ol-layer { position: absolute; width: 100%; height: 100%; left: 0; top: 0; }
 .ol-overlaycontainer, .ol-overlaycontainer-stopevent { pointer-events: none; }

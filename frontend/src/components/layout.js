@@ -57,7 +57,7 @@ export function initializeLayout({ root, onResize, announce }) {
   try { storage = window.localStorage; } catch { /* Storage can be denied. */ }
   const media = matchMedia('(max-width: 1099px)');
   const state = new LayoutState(readPanels(storage), media.matches);
-  const map = document.querySelector('#map');
+  const focusViewport = () => document.querySelector(root.classList.contains('is-3d') ? '#terrain-view' : '#map').focus({ preventScroll: true });
   let focusOrigin;
   let restoreScroll;
   let chromeState = [];
@@ -114,7 +114,7 @@ export function initializeLayout({ root, onResize, announce }) {
       restoreScroll?.();
       restoreScroll = null;
       if (focusOrigin?.isConnected && !focusOrigin.closest('[inert]')) focusOrigin.focus({ preventScroll: true });
-      else map.focus({ preventScroll: true });
+      else focusViewport();
       onResize();
     }
     announce(value ? 'Map focus mode. Press Escape to return.' : 'Dashboard restored.');
@@ -140,7 +140,7 @@ export function initializeLayout({ root, onResize, announce }) {
     state.compact = event.matches;
     state.drawer = null;
     render();
-    if (active?.closest('[inert]')) map.focus({ preventScroll: true });
+    if (active?.closest('[inert]')) focusViewport();
   });
   document.querySelector('.workspace').addEventListener('transitionend', onResize);
   render();
@@ -150,7 +150,7 @@ export function initializeLayout({ root, onResize, announce }) {
       if (!state.compact || !state.drawer) return;
       state.drawer = null;
       render();
-      map.focus({ preventScroll: true });
+      focusViewport();
     },
   };
 }
