@@ -1,11 +1,4 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "framework": "fastapi",
-  "functions": {
-    "backend/main.py": {
-      "maxDuration": 300,
-      "includeFiles": "assets/M20_JezeroCrater_CTXDEM_20m.tif",
-      "excludeFiles": "{frontend/**,.venv/**,backend/tests/**}"
-    }
-  }
+  "framework": "container"
 }
