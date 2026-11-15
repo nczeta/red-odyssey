@@ -11,5 +11,6 @@ COPY requirements.txt ./
 RUN pip install -r requirements.txt
 COPY backend/ ./backend/
 COPY assets/M20_JezeroCrater_CTXDEM_20m.tif ./assets/M20_JezeroCrater_CTXDEM_20m.tif
+RUN python -c "from pathlib import Path; import rasterio; from backend.main import app; p=Path('assets/M20_JezeroCrater_CTXDEM_20m.tif'); assert p.stat().st_size > 1000000, 'DEM is an LFS pointer, not a raster'; d=rasterio.open(p); print('DEM VERIFIED:', d.width, d.height, d.res, d.crs); d.close()"
 EXPOSE 80
 CMD ["sh", "-c", "exec uvicorn backend.main:app --host 0.0.0.0 --port ${PORT:-80}"]
