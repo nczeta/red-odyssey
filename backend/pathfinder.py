@@ -4,8 +4,7 @@ import matplotlib.pyplot as plt
 
 from backend.dem import load_dem
 
-
-dem = load_dem("../assets/M20_JezeroCrater_CTXDEM_20m.tif") # load the dem from the file
+dem = load_dem("../assets/M20_JezeroCrater_CTXDEM_20m.tif")  # load the dem from the file
 
 MAX_SLOPE = 20.0
 """
@@ -26,13 +25,14 @@ T0 = np.atan(np.tan(MAX_SLOPE) / np.sqrt(K - 1))
 T0 is computed based on the value of K chosen
 """
 
-
 """
 function that analyzes all the dem and calculates the slope for every pixel
 """
+
+
 def compute_slope(dem):
     z = dem.z.astype("float32").filled(np.nan)  # replace every non-valid point with NaN
-    zp = np.pad(z, 1, mode="edge") # adds an extra border around the matrix
+    zp = np.pad(z, 1, mode="edge")  # adds an extra border around the matrix
 
     # get every neighbor at the same time
     a = zp[:-2, :-2]
@@ -50,28 +50,37 @@ def compute_slope(dem):
     dzdy = ((g + 2 * h + i) - (a + 2 * b + c)) / (8 * dem.res[1])
 
     # 2. calculate the tan of the angle
-    g = np.hypot(dzdx, dzdy) # tan of the slope of every pixel of the map
+    g = np.hypot(dzdx, dzdy)  # tan of the slope of every pixel of the map
 
     return g
+
 
 """
 function that returns a boolean map of where the path is allowed to go
 False = dangerous pixel, angle > the maximum safe angle
 """
+
+
 def get_valid_map(slope):
     return np.isfinite(slope) & (slope <= np.tan(np.radians(MAX_SLOPE)))
+
 
 """
 function that calculates the mult for every pixel, used in the pathfinding algorithm
 """
+
+
 def compute_mult(g, t0):
-    mult = 1 + (g/np.tan(np.radians(t0)))**2 # formula that decides how much a steep slope penalizes the next pixel
+    mult = 1 + (g / np.tan(np.radians(t0))) ** 2  # formula that decides how much a steep slope penalizes the next pixel
     mult[~valid_map] = np.inf
     return mult
+
 
 """
 the real pathfinding algorithm, using skimage
 """
+
+
 def find_path(g, t0, dem, valid_map, start, target):
     if not (valid_map[start] and valid_map[target]):
         return None, None
@@ -83,6 +92,12 @@ def find_path(g, t0, dem, valid_map, start, target):
 
     return path, length * dem.res[0]
 
+
+def max_slope_on_path(g, path):
+    rows, cols = zip(*path)
+    return np.degrees(np.arctan(g[rows, cols].max()))
+
+
 if __name__ == "__main__":
     # calculate the slope
     g = compute_slope(dem)
@@ -90,14 +105,15 @@ if __name__ == "__main__":
     # get the valid map
     valid_map = get_valid_map(g)
     # check how much of the map is explorable
-    print(np.count_nonzero(valid_map)/valid_map.size)
+    print(np.count_nonzero(valid_map) / valid_map.size)
 
     # compute the path
-    path, length = find_path(g, T0, dem, valid_map, (100, 100), (4000, 4000))
+    path, length = find_path(g, T0, dem, valid_map, (4000, 4000), (2000, 4000))
     print(path, length)
+    print(max_slope_on_path(g, path))
 
     # displays the map
-    plt.imshow(valid_map)
+    plt.imshow(np.degrees(np.arctan(g)))
     # displays the path
     rows, cols = zip(*path)
     plt.plot(cols, rows, "r", linewidth=1)
