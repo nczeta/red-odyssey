@@ -3,6 +3,9 @@ import { IMAGERY_EXTENT, MARS_CRS, registerMarsProjection } from '../map/marsPro
 /** GeoJSON exports must declare their verified coordinate CRS per layer. */
 export const appConfig = {
   region: 'Jezero Crater',
+  terrain: {
+    sourceUrl: `${import.meta.env?.BASE_URL ?? '/'}models/jezero-crater-3d.glb`,
+  },
   spatial: {
     local: false,
     code: MARS_CRS,

@@ -5,6 +5,7 @@ import { createMap } from './map/createMap.js';
 import { LayerManager } from './layers/manager.js';
 import { requestRoute } from './services/api.js';
 import { initializeLegend } from './components/legend.js';
+import { initializeTerrain } from './components/terrain.js';
 
 const root = document.querySelector('#app');
 const state = {
@@ -41,6 +42,7 @@ manager = new LayerManager(mapController.map, layerConfig, appConfig.spatial.cod
 initializeLayers(manager);
 const disposeLegend = initializeLegend(manager);
 const layout = initializeLayout({ root, onResize: mapController.updateSize, announce });
+const terrain = initializeTerrain({ root, sourceUrl: appConfig.terrain.sourceUrl, onMapResize: mapController.updateSize, announce });
 
 function cancelRoute() {
   requestController?.abort();
@@ -77,6 +79,7 @@ function render() {
 }
 
 for (const button of document.querySelectorAll('[data-tool]')) button.addEventListener('click', () => {
+  terrain.setMode('2d');
   state.tool = state.tool === button.dataset.tool ? null : button.dataset.tool;
   state.selected = null;
   state.feature = null;
@@ -86,12 +89,14 @@ for (const button of document.querySelectorAll('[data-tool]')) button.addEventLi
   announce(state.tool ? `${button.textContent.trim()} selected.` : 'Route Planner closed.');
 });
 for (const endpoint of ['start', 'end']) $(`#set-${endpoint}`).addEventListener('click', () => {
+  terrain.setMode('2d');
   state.route.choosing = state.route.choosing === endpoint ? null : endpoint;
   render();
   layout.closeDrawers();
   $('#map').focus({ preventScroll: true });
 });
 $('#clear-route').addEventListener('click', () => {
+  terrain.setMode('2d');
   cancelRoute();
   state.route = { start: null, end: null, choosing: 'start', status: 'idle', metrics: null, error: null };
   render();
@@ -154,4 +159,4 @@ if (!appConfig.spatial.local) {
   $('#map').setAttribute('aria-label', `Map in ${appConfig.spatial.code}. Arrow keys to pan. Plus and minus to zoom. Enter to place an active route endpoint.`);
   $('#map-instructions').textContent = 'Drag to pan; use zoom controls or scroll to zoom. Use Route Planner to place endpoints or click a geological unit to inspect it.';
 }
-if (import.meta.hot) import.meta.hot.dispose(() => { requestController?.abort(); disposeLegend(); mapController.dispose(); });
+if (import.meta.hot) import.meta.hot.dispose(() => { requestController?.abort(); terrain.dispose(); disposeLegend(); mapController.dispose(); });
