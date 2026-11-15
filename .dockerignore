@@ -1,0 +1,9 @@
+.git
+.github
+.vercel
+frontend
+docs
+.venv
+**/__pycache__
+**/.pytest_cache
+backend/tests
