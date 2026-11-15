@@ -76,7 +76,6 @@ export function initializeLayout({ root, onResize, announce }) {
     document.querySelector('#focus-map').setAttribute('aria-pressed', String(state.focus));
     document.querySelector('#focus-map').hidden = state.focus;
     document.querySelector('#exit-focus').hidden = !state.focus;
-    document.querySelector('#project-info').hidden = state.focus;
     onResize();
   };
   const toggle = side => {

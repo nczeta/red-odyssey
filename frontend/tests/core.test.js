@@ -5,6 +5,7 @@ import { addProjection, addCoordinateTransforms } from 'ol/proj.js';
 import { LayerManager, createLayer, readGeoJSON } from '../src/layers/manager.js';
 import { LayoutState, readPanels, savePanels, STORAGE_KEY } from '../src/components/layout.js';
 import { requestRoute } from '../src/services/api.js';
+import VectorLayer from 'ol/layer/Vector.js';
 
 // Technical fixtures only. These are deliberately arbitrary local drawing coordinates.
 const CRS = 'TEST:LOCAL';
@@ -150,7 +151,7 @@ test('route API sends declared coordinates and CRS, without inventing absent met
   const result = await requestRoute({ start: [0, 0], end: [10, 10], crs: CRS, api }, async (url, options) => {
     assert.equal(url, '/api/route');
     assert.equal(options.method, 'POST');
-    assert.deepEqual(JSON.parse(options.body), { start: [0, 0], end: [10, 10], crs: CRS });
+    assert.deepEqual(JSON.parse(options.body), { start: [0, 0], end: [10, 10], waypoints: [], reorder: true, crs: CRS });
     return { ok: true, json: async () => ({ route: routeData }) };
   });
   assert.equal(result.metrics, null);
@@ -172,4 +173,48 @@ test('changing endpoints can abort an in-flight route request', async () => {
   }));
   controller.abort();
   await assert.rejects(pending, { name: 'AbortError' });
+});
+
+test('route API displays terrain failures and rejects a conflicting response CRS', async () => {
+  const params = { start: [0, 0], end: [1, 1], crs: CRS, api };
+  await assert.rejects(() => requestRoute(params, async () => ({ ok: false, status: 422, json: async () => ({ detail: 'Destination is outside the routing DEM coverage.' }) })), /outside the routing DEM/);
+  await assert.rejects(() => requestRoute(params, async () => ({ ok: true, json: async () => ({ crs: 'EPSG:4326', route: routeData }) })), /unexpected CRS/);
+});
+
+test('route API sends intermediate stops and the order toggle and returns the visited order', async () => {
+  for (const reorder of [false, true]) {
+    const waypoints = [[8, 0], [3, 0]];
+    const order = reorder ? [1, 0] : [0, 1];
+    const result = await requestRoute({ start: [0, 0], end: [10, 0], waypoints, reorder, crs: CRS, api }, async (_url, options) => {
+      assert.deepEqual(JSON.parse(options.body), { start: [0, 0], end: [10, 0], waypoints, reorder, crs: CRS });
+      return { ok: true, json: async () => ({ route: routeData, waypointOrder: order }) };
+    });
+    assert.deepEqual(result.waypointOrder, order);
+  }
+  await assert.rejects(() => requestRoute({ start: [0, 0], end: [10, 0], waypoints: [[NaN, 0]], crs: CRS, api }), /valid intermediate stops/);
+});
+
+test('route contrast follows the top visible map and opacity without changing geometry', () => {
+  const ids = ['imagery', 'elevation', 'slope', 'contours', 'geology'];
+  const colors = ['#5EF0FF', '#FF59ED', '#5EF0FF', '#FFE66D', '#FFFFFF'];
+  const manager = new LayerManager(fakeMap(), [{ ...vectorConfig, id: 'routes', sourceUrl: null }, ...ids.map((id, order) => ({ ...vectorConfig, id, type: 'cog', order }))], CRS);
+  ids.forEach((id, order) => { manager.get(id).layer = new VectorLayer({ visible: false, opacity: 1, zIndex: order }); });
+  manager.setGeoJSON('routes', routeData, CRS);
+  const route = manager.get('routes').layer;
+  const geometry = route.getSource().getFeatures()[0].getGeometry();
+  ids.forEach((id, i) => {
+    manager.setVisible(id, true);
+    const style = route.getStyle();
+    assert.equal(style[1].getStroke().getColor(), colors[i]);
+    assert.ok(style[0].getStroke().getWidth() > style[1].getStroke().getWidth());
+    assert.equal(route.getSource().getFeatures()[0].getGeometry(), geometry);
+  });
+  manager.setOpacity('geology', 0);
+  assert.equal(route.getStyle()[1].getStroke().getColor(), colors[3]);
+  manager.setVisible('contours', false);
+  assert.equal(route.getStyle()[1].getStroke().getColor(), colors[2]);
+  manager.setOrder('elevation', 10);
+  assert.equal(route.getStyle()[1].getStroke().getColor(), colors[1]);
+  manager.setGeoJSON('routes', routeData, CRS);
+  assert.equal(manager.get('routes').layer.getStyle()[1].getStroke().getColor(), colors[1]);
 });
