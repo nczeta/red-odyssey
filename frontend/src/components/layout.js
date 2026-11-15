@@ -86,7 +86,7 @@ export function initializeLayout({ root, onResize, announce }) {
     render();
     if (!state.visible(side) && document.querySelector(`#${side}-panel`).contains(active)) document.querySelector(`#open-${side}`).focus({ preventScroll: true });
     else if (state.visible(side)) document.querySelector(`#close-${side}`).focus({ preventScroll: true });
-    announce(`${side === 'left' ? 'Map layers' : 'Analysis'} ${state.visible(side) ? 'opened' : 'closed'}.`);
+    announce(`${side === 'left' ? 'Map layers' : 'Map legend'} ${state.visible(side) ? 'opened' : 'closed'}.`);
   };
   for (const side of ['left', 'right']) {
     document.querySelector(`#open-${side}`).addEventListener('click', () => toggle(side));

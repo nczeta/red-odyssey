@@ -4,10 +4,11 @@ import { initializeLayers, renderAnalysis, formatPoint } from './components/pane
 import { createMap } from './map/createMap.js';
 import { LayerManager } from './layers/manager.js';
 import { requestRoute } from './services/api.js';
+import { initializeLegend } from './components/legend.js';
 
 const root = document.querySelector('#app');
 const state = {
-  tool: 'explore', selected: null, feature: null,
+  tool: null, selected: null, feature: null,
   route: { start: null, end: null, choosing: null, status: 'idle', metrics: null, error: null },
 };
 const $ = selector => document.querySelector(selector);
@@ -22,19 +23,23 @@ const mapController = createMap(appConfig, (coordinate, hit) => {
     state.route[endpoint] = [...coordinate];
     state.route.status = 'selecting';
     state.route.choosing = endpoint === 'start' && !state.route.end ? 'end' : null;
-    announce(`${endpoint === 'start' ? 'Starting point' : 'Destination'} placed. ${state.route.choosing ? 'Select a destination.' : 'Endpoints are local coordinates only.'}`);
-  } else {
+    announce(`${endpoint === 'start' ? 'Starting point' : 'Destination'} placed. ${state.route.choosing ? 'Select a destination.' : `Endpoints are in ${appConfig.spatial.code}.`}`);
+  } else if (hit?.layer.get('registryId') === 'geology') {
     state.selected = [...coordinate];
-    state.feature = hit ? { id: hit.layer.get('registryId'), properties: hit.feature.getProperties() } : null;
-    announce(`Location selected. ${appConfig.spatial.local ? 'Local coordinates' : appConfig.spatial.code}: ${formatPoint(coordinate)}.`);
+    state.feature = hit ? { id: hit.layer.get('registryId'), properties: hit.feature.getProperties(), sourceName: hit.layer.get('datasetName') } : null;
+    announce('Geological unit selected.');
+    render();
+    if (!$('#selection-dialog').open) $('#selection-dialog').showModal();
+    return;
+  } else {
+    return;
   }
   render();
-}, coordinate => {
-  $('#pointer-coordinates').textContent = `X ${coordinate[0].toFixed(1)}   Y ${coordinate[1].toFixed(1)}   ${appConfig.spatial.local ? 'LOCAL' : appConfig.spatial.units}`;
 });
 
 manager = new LayerManager(mapController.map, layerConfig, appConfig.spatial.code);
 initializeLayers(manager);
+const disposeLegend = initializeLegend(manager);
 const layout = initializeLayout({ root, onResize: mapController.updateSize, announce });
 
 function cancelRoute() {
@@ -65,18 +70,20 @@ function render() {
   hint.hidden = state.tool !== 'route' || !route.choosing;
   hint.textContent = `Select ${route.choosing === 'start' ? 'starting point A' : 'destination B'} · Click the map or press Enter at its center`;
   $('#map').classList.toggle('placing-endpoint', state.tool === 'route' && Boolean(route.choosing));
-  // The first local selection makes space for the actual marker, rather than obscuring it.
+  // Make space for the selection marker while no visible data layer is ready.
   $('#map-empty').classList.toggle('has-selection', Boolean(state.selected || route.start || route.end));
   mapController.setMarkers(state.selected, route.start, route.end);
   renderAnalysis(state, appConfig);
 }
 
 for (const button of document.querySelectorAll('[data-tool]')) button.addEventListener('click', () => {
-  state.tool = button.dataset.tool;
+  state.tool = state.tool === button.dataset.tool ? null : button.dataset.tool;
+  state.selected = null;
+  state.feature = null;
   state.route.choosing = state.tool === 'route' ? (!state.route.start ? 'start' : !state.route.end ? 'end' : null) : null;
   render();
   if (state.tool === 'route' && state.route.choosing) layout.closeDrawers();
-  announce(`${button.textContent.trim()} selected.`);
+  announce(state.tool ? `${button.textContent.trim()} selected.` : 'Route Planner closed.');
 });
 for (const endpoint of ['start', 'end']) $(`#set-${endpoint}`).addEventListener('click', () => {
   state.route.choosing = state.route.choosing === endpoint ? null : endpoint;
@@ -116,16 +123,24 @@ $('#calculate-route').addEventListener('click', async () => {
 });
 
 manager.addEventListener('change', () => {
-  $('[data-tool="sites"]').disabled = manager.get('sites').state !== 'ready';
+  if (state.feature?.id === 'geology' && !manager.get('geology').config.visible) { state.feature = null; render(); }
   const connected = [...manager.entries.values()].some(entry => entry.state === 'ready');
-  $('#map-empty').hidden = connected;
+  const visible = [...manager.entries.values()].some(entry => entry.state === 'ready' && entry.config.visible);
+  $('#map-empty').hidden = visible;
+  const activeRasters = [...manager.entries.values()].filter(entry => ['cog', 'contours', 'geology'].includes(entry.config.type) && entry.config.visible);
+  const loading = activeRasters.find(entry => ['loading', 'configured'].includes(entry.state));
+  const failed = activeRasters.find(entry => entry.state === 'error');
+  const empty = $('#map-empty');
+  empty.querySelector('h3').textContent = loading ? 'Loading Jezero map' : failed ? 'Map unavailable' : 'Explore Jezero Crater';
+  empty.querySelector('p').textContent = loading ? `Loading ${loading.config.name}.` : failed?.error || 'Enable a map in Map Layers to view the surface.';
   $('.tag-secondary').textContent = connected ? 'DATA CONNECTED' : 'NO DATA CONNECTED';
   $('.left-sidebar .sidebar-footer > span:last-child').textContent = connected ? 'Geospatial data connected' : 'Awaiting geospatial data';
-  $('#sites-help').textContent = manager.get('sites').state === 'ready' ? 'Select a scientific feature on the map to inspect its attributes.' : 'Scientific sites require a configured dataset.';
   if (!appConfig.spatial.local) $('#map-spatial-label').textContent = appConfig.spatial.code;
 });
 
 const dialog = $('#info-dialog');
+const selectionDialog = $('#selection-dialog');
+$('#close-selection').addEventListener('click', () => selectionDialog.close());
 $('#project-info').addEventListener('click', () => dialog.showModal());
 $('#close-info').addEventListener('click', () => dialog.close());
 dialog.addEventListener('click', event => { if (event.target === dialog) { const bounds = dialog.getBoundingClientRect(); if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) dialog.close(); } });
@@ -136,7 +151,7 @@ if (!appConfig.spatial.local) {
   $('.workspace-tag > span:nth-child(2)').textContent = 'SPATIAL WORKSPACE';
   $('#map-spatial-label').textContent = appConfig.spatial.code;
   $('.tool-tag').textContent = 'GIS';
-  $('#map').setAttribute('aria-label', `Map in ${appConfig.spatial.code}. Arrow keys to pan. Plus and minus to zoom. Enter to select center.`);
-  $('#map-instructions').textContent = 'Drag to pan; use zoom controls or scroll to zoom. Click to select a location in the configured map projection.';
+  $('#map').setAttribute('aria-label', `Map in ${appConfig.spatial.code}. Arrow keys to pan. Plus and minus to zoom. Enter to place an active route endpoint.`);
+  $('#map-instructions').textContent = 'Drag to pan; use zoom controls or scroll to zoom. Use Route Planner to place endpoints or click a geological unit to inspect it.';
 }
-if (import.meta.hot) import.meta.hot.dispose(() => { requestController?.abort(); mapController.dispose(); });
+if (import.meta.hot) import.meta.hot.dispose(() => { requestController?.abort(); disposeLegend(); mapController.dispose(); });

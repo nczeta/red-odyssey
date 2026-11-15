@@ -9,7 +9,7 @@ Atlante planetario educativo per un progetto indipendente destinato alla NASA In
 - `project.html`: overview, workflow, catalogo degli otto layer, analisi del terreno, routing, tecnologie, fonti e team.
 - `app.html`: accesso diretto all’explorer, anche dalla pagina Project.
 
-`vite.config.js` dichiara i tre ingressi HTML tramite `build.rolldownOptions.input`. `cssCodeSplit: false` produce un unico CSS condiviso anche in produzione. Tutte le pagine collegano direttamente lo stesso stylesheet. La pagina Project non importa i moduli OpenLayers.
+`vite.config.js` dichiara i tre ingressi HTML tramite `build.rolldownOptions.input`. `cssCodeSplit: false` produce un unico CSS condiviso anche in produzione. Tutte le pagine collegano direttamente lo stesso stylesheet. La pagina Project condivide la configurazione dei layer e del CRS, senza inizializzare una mappa.
 
 Navbar, footer e icone statiche sono scritti direttamente in `index.html` e `project.html`. La struttura della dashboard, dei pannelli e del dialog informativo è in `app.html`; JavaScript gestisce interazioni e risultati dinamici. Gli URL di navigazione sono veri link HTML: possono essere aperti in nuove schede e funzionano senza un router JavaScript.
 
@@ -46,21 +46,140 @@ Inter e IBM Plex sono distribuiti con le rispettive licenze in `public/licenses/
 
 ## Cosa è operativo
 
-- Mappa OpenLayers con pan, zoom, reset, selezione locale e marker.
+- Mappa OpenLayers in MARS con Mars Imagery COG, pan, zoom, reset sulla copertura, selezione metrica e marker.
 - Sidebar indipendenti su desktop, con quattro configurazioni persistenti. Chiudere un pannello libera lo spazio; `ResizeObserver` e `map.updateSize()` seguono il cambiamento del viewport.
 - Map Focus nella pagina: espande lo stesso contenitore mappa con `position: fixed`, senza ricreare l'istanza OpenLayers; nasconde e rende non interattivi navbar, hero, footer e pannelli. Il documento sottostante è bloccato; pulsante di uscita ed ESC ripristinano scroll, pannelli e focus. Tab/Shift+Tab restano nei controlli visibili. Non utilizza la Fullscreen API nativa.
 - Sotto 1100px, drawer esclusivi. Le preferenze desktop restano separate; scegliere un endpoint richiude il drawer per poter usare la mappa.
-- Route Planner per posizionare, sostituire e cancellare A/B. Nessun percorso viene disegnato tra punti locali.
-- Registry con adapter GeoJSON e XYZ, visibilità, ordine, opacità raster, attribution, caricamento ed errori. I controlli dei dataset non configurati sono disabilitati.
+- Route Planner per posizionare, sostituire e cancellare A/B nel CRS della mappa. Nessun percorso viene calcolato senza backend.
+- Registry con adapter GeoJSON, XYZ e COG, visibilità, ordine, opacità raster, attribution, caricamento ed errori. I controlli dei dataset non configurati sono disabilitati.
 - Dialog informazioni, etichette accessibili, focus visibile, pannelli chiusi `inert`, controlli touch, reduced-motion.
 
 La mappa è focalizzabile: frecce per spostarsi, `+`/`-` per zoomare, Invio per selezionare il centro o collocare l'endpoint attivo. Si può anche cliccare o toccare direttamente la mappa.
 
-## Il placeholder non rappresenta Marte
+## MAP LEGEND — sidebar destra
 
-`LOCAL:WORKSPACE` è un sistema astratto, non globale. Le unità `pixels` indicano unità di disegno, non pixel dello schermo, metri o gradi. Griglia, origine e coordinate servono a verificare l'interazione cartografica. Non esistono latitudine, longitudine, scala metrica, terreno, distanze, pendenze o difficoltà reali in questa configurazione.
+La sidebar destra è dedicata a **MAP LEGEND** e mantiene dimensioni, tipografia, controlli di apertura/chiusura e comportamento responsive esistenti. Il contenuto è derivato da `LayerManager.entries` e dalla visibilità effettiva dei layer: nessun toggle o stato di selezione separato. Le sezioni compaiono/scompaiono con le mappe e si impilano quando sono attivi più layer tematici. Imagery non richiede una legenda: senza layer tematici visibili si mostra uno stato vuoto minimo.
 
-Elevazione, slope e difficoltà restano senza dati. L'adapter XYZ visualizza raster già renderizzati: non campiona DEM né interpreta i colori come quote. Il profilo altimetrico non viene simulato. GeoTIFF/COG, campionamento raster e algoritmi di pathfinding non sono implementati.
+`src/components/legend.js` rende un unico modello riutilizzabile con gruppi, note, campioni SVG e label. I campioni delle isoipse sono rettangoli con lo stesso RGBA dello stroke sullo stesso sfondo nero; larghezza delle linee e opacità sono indicate nel testo. I campioni poligonali riproducono fill, alpha e contorni continui/tratteggiati dei vettori. Dati e stringhe delle categorie sono escapati. Le notifiche dei tile non ricostruiscono il DOM se la legenda non cambia; lo scorrimento resta stabile durante la navigazione, mentre il cambio dei layer attivi riparte dall'inizio.
+
+Origine delle definizioni:
+
+- **Contour Lines:** `legendDefinition` generata in `src/layers/contours.js` dagli stessi oggetti `Style`, dalle palette invertite e dai limiti calcolati su ELEV. Cinque classi di 560 m, limiti `[-3400, -2840, -2280, -1720, -1160, -600]`, unità metri; l'ultima classe include il massimo. Equidistanza delle isoipse 200 m, stroke da 1 px e alpha 0.65 applicato una sola volta.
+- **Geological Map:** `legendDefinition` generata in `src/layers/geology.js` dalle cache degli stili. Mostra 17 categorie Goudge da `Unit_Name` e 14 categorie USGS da `symbol`, con nomi originali da `name` quando presenti. Fill al 14% e contorni come nella mappa. Sono colori vettoriali provvisori: non rappresentano priorità scientifica né una ricostruzione dei colori ufficiali. La sidebar specifica che manca la chiave colore→unità del raster QGIS sottostante.
+- **Elevation e Slope:** sezioni informative definite accanto alle configurazioni raster in `src/config/app.js`. I file sono RGB+alpha uint8, PhotometricInterpretation RGB, senza ColorMap né metadati di banda; il solo metadato GDAL globale è `OVERVIEW_RESAMPLING=AVERAGE`. La tavola di corrispondenza colore→valore non è disponibile. Non si ricostruiscono gradienti numerici, classi o soglie. Elevation non documenta valori numerici, unità verticali o datum; Slope non documenta gradi/percentuali o soglie. Per stabilire intervalli continui/discreti e palette quantitative servono i raster scientifici originali e/o gli stili o le legende QGIS.
+
+La precedente ispezione delle coordinate e degli attributi geologici è conservata nella finestra **Location details**, accessibile dal pulsante con mirino dopo una selezione e aperta automaticamente sul clic di un'unità geologica. I risultati e le metriche del percorso sono nel Route Planner a sinistra. La sidebar destra contiene solo legende. Map Focus, selezione dei punti, interruttori e opacità mantengono il comportamento esistente. Nessuna modifica a GeoTIFF o GeoJSON.
+
+Verifiche di questa modifica: 41 test Node, con confronto dei simboli/range rispetto agli stili OpenLayers reali, visibilità multipla, rimozione delle sezioni, cache DOM ed escaping. Browser sulla build di produzione a 1440, 768 e 390 px: sezioni Elevation/Slope simultanee, cinque classi Contour Lines corrette, 31 categorie geologiche, scorrimento senza overflow orizzontale e conservato durante pan/zoom, stato vuoto e cambio mappa sincronizzati. Verificati anche ispezione geologica nella nuova finestra e Route Planner; nessun errore JavaScript, warning del browser o richiesta fallita. Build multipagina riuscita; rimane l'avviso preesistente sul chunk oltre 500 kB. File: nuovo `src/components/legend.js`; aggiornati `app.html`, `src/main.js`, `src/style.css`, `src/components/layout.js`, `src/config/app.js`, `src/layers/contours.js`, `src/layers/geology.js`, `tests/site.test.js`, `tests/contours.test.js`, `tests/geology.test.js` e questo README.
+
+## Mars Imagery 01
+
+La mappa usa il COG originale `public/maps/rasters/01_Mars_Imagery_20m_COG.tif`, senza modificarlo. Il CRS `MARS:JEZERO` (Jezero_Crater_Projection) è registrato con Proj4js e OpenLayers in `src/map/marsProjection.js`; il precedente codice `MARS` resta un alias equivalente, con trasformazione identità e coordinate invariate:
+
+```text
++proj=eqc +lat_ts=18.4663 +lat_0=0 +lon_0=0 +x_0=0 +y_0=0 +R=3396190 +units=m +no_defs +type=crs
+```
+
+Metadati verificati direttamente nel file:
+
+- Extent: `[4329000, 1041020, 4421160, 1143420]`; centro: `[4375080, 1092220]`. L'extent del DEM è diverso e non viene utilizzato.
+- Dimensioni: 4608 × 5120 pixel; pixel: 20 × 20 m; origine: `[4329000, 1143420]`, asse raster Y verso sud.
+- Quattro bande uint8: RGB più alpha non premoltiplicato; nessun valore NoData. Normalizzazione fissa 0–255, senza stretch radiometrico. L'alpha della quarta banda conserva i bordi trasparenti.
+- Tile: 512 × 512, compressione DEFLATE; overview a 40, 80, 160 e 320 m/pixel.
+- Raggio sferico: 3396190 m; parallelo standard: 18.4663°; centro proiezione e false origini: 0.
+
+`src/layers/cog.js` crea `ol/source/GeoTIFF` e `ol/layer/WebGLTile`. La proiezione viene fornita esplicitamente perché il GeoTIFF dichiara un CRS personalizzato (GeoKey 32767), senza sostituirlo con CRS terrestri. L'adapter verifica l'extent dei metadati prima di aggiungere il layer alla stessa mappa esistente. Il manager distingue caricamento metadati, caricamento tile ed errori; gli stessi controlli regolano visibilità e opacità.
+
+La vista iniziale e Reset view inquadrano l'intera copertura nel viewport corrente. Il centro resta entro l'extent; la risoluzione varia tra 1280 e 5 m/pixel. Sotto 20 m/pixel si ingrandiscono i pixel esistenti: non aumenta il dettaglio scientifico.
+
+Il server deve supportare HTTP Range (`206 Partial Content`); Vite dev e preview lo supportano. Per hosting su altro dominio servono anche CORS e accesso agli header di range. Il file viene copiato in `dist/maps/rasters/` dalla build e il suo URL rispetta `BASE_URL`. Nessun backend è necessario per le immagini.
+
+## Elevation 02 e Slope 05
+
+Sono collegati anche `public/maps/rasters/02_Elevation_20m_COG.tif` e `public/maps/rasters/05_Slope_20m_COG.tif`, tramite lo stesso adapter COG, registry e istanza OpenLayers della mappa 01. La sidebar mantiene interruttori indipendenti: si possono sovrapporre i raster e regolarne l'opacità. Per vedere solo una mappa, attivarla e disattivare le altre. Imagery resta visibile all'avvio; Elevation e Slope sono inizialmente nascosti. L'ordine resta Imagery, Elevation, Slope; il layer superiore visibile copre quelli inferiori secondo la propria opacità e alpha.
+
+Il pannello mostra sei toggle: Mars Imagery, Elevation, Slope, Contour Lines, Geological Map e Scientific Sites. Scientific Sites resta predisposto e disabilitato fino al collegamento di un dataset di punti. Hillshade e Terrain Difficulty sono rimossi dal registry; Routes resta un layer interno per i risultati del planner, senza toggle e senza essere incluso nel contatore del pannello. Lo slider di opacità è chiuso all'avvio e si apre con il pulsante a cerchio mezzo pieno, per un raster attivo. Si apre un solo slider alla volta; disattivare il layer o premere ESC lo richiude, conservando il valore. Il pulsante “i” apre una finestra con descrizione e note di legenda del livello, anche per quelli ancora da integrare, senza modificarne la visibilità. Descrizioni e legende non occupano spazio sotto gli slider.
+
+Metadati ispezionati separatamente per ciascun file:
+
+| Proprietà | Elevation 02 | Slope 05 |
+| --- | --- | --- |
+| Extent | `[4329000, 1041020, 4421160, 1143420]` | `[4329000, 1041020, 4421160, 1143420]` |
+| Dimensioni e pixel | 4608 × 5120, 20 m | 4608 × 5120, 20 m |
+| Proiezione | Jezero_Crater_Projection, sfera di raggio 3396190 m | Identica definizione, verificata nei GeoKey |
+| Bande | RGB uint8 + alpha non premoltiplicato | RGB uint8 + alpha non premoltiplicato |
+| NoData | Nessun valore NoData; bordi trasparenti tramite alpha | Nessun valore NoData; bordi trasparenti tramite alpha |
+| Tile / overview | 512 × 512; 40, 80, 160, 320 m/pixel | 512 × 512; 40, 80, 160, 320 m/pixel |
+| Metadati GDAL | Solo `OVERVIEW_RESAMPLING=AVERAGE`; nessun metadato di banda | Solo `OVERVIEW_RESAMPLING=AVERAGE`; nessun metadato di banda |
+
+L'extent è uguale a quello di Imagery, ma diverso dall'extent DEM di riferimento: non è stato dedotto dal DEM. Ogni voce dichiara la propria copertura e l'adapter la confronta con i metadati. Posizione, scala e griglia dei tre raster coincidono; cambiare visibilità o opacità non chiama `fit`, non sostituisce la vista e non ricrea mappa o sorgenti.
+
+Entrambi sono esportazioni QGIS già colorate: si preservano le quattro bande con normalizzazione fissa 0–255, senza stretch, interpolazioni di palette, classificazioni o soglie aggiunte. I colori vengono visualizzati direttamente e l'alpha originale resta operativo.
+
+**Limiti scientifici:** questi file non contengono una banda di quote o pendenze numeriche, né una tabella per ricavare valori dai colori. Le unità verticali e il datum altimetrico non sono documentati; per Slope non è documentato se i valori originali fossero in gradi o percentuale. I metri dichiarati nel CRS sono unità orizzontali e non provano le unità verticali. Mancano anche progetto QGIS, file di stile e intervalli della legenda originale. Non si inventano una legenda quantitativa o valori di analisi. Per misure servono i raster scientifici originali e i relativi metadati. La sidebar esplicita questi limiti.
+
+## Contour Lines 03
+
+Il toggle `Contour Lines` gestisce un `LayerGroup` con due figli, in quest'ordine: `public/maps/rasters/03_Contour_Background_20m_COG.tif` come sfondo nero, `public/maps/vectors/03_Contour_Lines.geojson` come isoipse sopra lo sfondo. Si riutilizzano l'adapter COG e l'istanza OpenLayers esistenti. Visibilità e z-index del gruppo si applicano a entrambi i figli. Il caricamento del GeoJSON termina prima che il gruppo venga aggiunto: errori di caricamento non pubblicano una composizione parziale. Attivazioni successive riusano gruppo, sorgenti e geometrie già caricati.
+
+Il TIFF è RGBA uint8, con nero opaco al centro e bordi trasparenti originali. Ha pixel di 20 m, extent `[4329000, 1041020, 4421160, 1143420]` e GeoKey che confermano Jezero_Crater_Projection, raggio 3396190 m, parallelo standard 18.4663°, centro e false origini zero. Il GeoJSON non dichiara un CRS: le coordinate sono metriche e hanno extent circa `[4329000, 1042100, 4418100, 1143400]`, contenuto nel TIFF e compatibile con il DEM Jezero. Viene interpretato esplicitamente in `MARS:JEZERO`, senza trasformazioni, preservando tutte le coordinate originali. Questa è un'inferenza verificata dalla compatibilità spaziale, non una dichiarazione CRS contenuta nel GeoJSON. Un controllo a runtime rifiuta geometrie esterne alla copertura con tolleranza di 1 cm per gli arrotondamenti.
+
+Sono presenti **4322 LineString**, con 371964 vertici e nessun valore ELEV invalido. Minimo: **−3400 m**; massimo: **−600 m**. I 15 valori distinti sono separati da 200 m. Le classi cromatiche usano equal interval sull'intero intervallo osservato: `(−600 − (−3400)) / 5 = 560 m` per classe, indipendentemente dall'equidistanza verticale delle isoipse.
+
+| Classe | Intervallo ELEV (m) | Colore | Feature |
+| --- | --- | --- | --- |
+| 1 | [−3400, −2840) | `#6E6862` | 150 |
+| 2 | [−2840, −2280) | `#8B847D` | 1596 |
+| 3 | [−2280, −1720) | `#A9A39C` | 1674 |
+| 4 | [−1720, −1160) | `#C5C0BA` | 718 |
+| 5 | [−1160, −600] | `#D9D6D1` | 184 |
+
+Gli intervalli includono il limite inferiore; solo l'ultimo include anche quello superiore. I limiti sono calcolati dai dati durante il caricamento. La funzione di stile riutilizza cinque `Style` con `Stroke` da **1 px** e alpha **0.65** nel colore. Opacità del vettore e del gruppo: 1. Il gruppo non espone un secondo slider di opacità, per mantenere l'alpha richiesto. Valori ELEV numerici o stringhe numeriche sono accettati; mancanti, vuoti e non finiti non vengono disegnati. Se tutte le quote coincidono si usa il primo stile; se nessuna è valida rimane lo sfondo senza curve. La legenda effettiva è accessibile dal pulsante “i”. Nessuna modifica ai file GIS originali.
+
+Gli interruttori restano indipendenti, come per gli altri raster: attivando 03 si mostrano insieme sfondo e curve sopra le altre mappe; disattivandolo si rivelano le mappe ancora attive. Per passare interamente a un'altra mappa, disattivare 03 e attivare quella desiderata. Centro e zoom restano invariati.
+
+File dell'integrazione 03: nuovo `src/layers/contours.js`, aggiornati `src/layers/manager.js`, `src/config/app.js`, `src/main.js`, `src/style.css`, `app.html`, questo README; nuovo `tests/contours.test.js`. La suite comprende 34 test, inclusi metadati reali, uguaglianza delle geometrie originali, classi, valori limite/invalidi/costanti, caricamento HTTP delle due risorse e visibilità effettiva del gruppo.
+
+Verifica browser sulla build di produzione: TIFF 03 caricato via HTTP 206, GeoJSON via HTTP 200 con una sola richiesta anche dopo più attivazioni. Curve visibili sopra il nero e rimosse alla disattivazione (83089 pixel di vettore nel controllo desktop contro i soli 167 pixel del marker senza isoipse). Centro e scala identici prima/dopo la selezione; verificati pan, zoom, reset, legenda, ritorno a Imagery e attivazione di Elevation/Slope. Rendering ispezionato a 1440 e 390 px, senza errori JavaScript, warning del browser o richieste fallite. La build conserva il precedente avviso sul chunk oltre 500 kB. Touch e pinch su dispositivo fisico restano una verifica manuale.
+
+## Geological Map 04
+
+Il toggle `Geological Map`, senza prefissi numerici, controlla un unico `LayerGroup` nello stesso oggetto Map. Il gruppo riutilizza la composizione di Contour Lines tramite `src/layers/rasterGroup.js`, mantenendo l'ordine raster → Goudge → USGS:
+
+| Dataset | Contenuto verificato | Attributi principali |
+| --- | --- | --- |
+| `public/maps/rasters/04_Geology_20m_COG.tif` | 4608 × 5120, pixel 20 m, RGB uint8 + alpha non premoltiplicato, overview 40/80/160/320 m | Colori originali preservati, nessun NoData dichiarato |
+| `public/maps/vectors/04_Goudge_Geology.geojson` | 113 MultiPolygon, 64816 vertici, 17 unità distinte | `fid`, `TARGET_FID`, `Unit_Name` |
+| `public/maps/vectors/04_USGS_Geology.geojson` | 1021 MultiPolygon, 1059651 vertici, 14 simboli distinti | `fid`, `OBJECTID`, `unit`, `name`, `symbol_noSub`, `subscript`, `symbol`, `ORIG_FID`, `SHAPE_Length`, `SHAPE_Area`, `Color_ID` |
+
+**Non sono presenti Point, MultiPoint o record POI.** Non si generano centroidi da presentare come siti scientifici. Sono invece selezionabili le unità geologiche: il clic apre Analysis e rende visibili fonte, nome/codice dell'unità e gli altri attributi scalari disponibili. Valori nulli e geometria non vengono mostrati; gli attributi non vengono rinominati né inventati e le stringhe sono trattate come testo. Disattivare Geological Map nasconde tutti i figli e rimuove i dettagli dell'unità selezionata. Il valore numerico di `SHAPE_Area`/`SHAPE_Length` resta quello del file, senza attribuirgli unità non documentate.
+
+**CRS e coperture:** il GeoTIFF conferma Jezero_Crater_Projection (eqc, raggio 3396190 m, parallelo standard 18.4663°, centro e false origini zero), con extent `[4329000, 1041020, 4421160, 1143420]`. Entrambi i GeoJSON omettono la dichiarazione CRS. Le coordinate metriche sono compatibili con `MARS:JEZERO` e vengono lette con proiezioni sorgente e vista esplicite, senza trasformazione. Extent Goudge: `[4328978.253932305, 1058000.0001220717, 4406291.218729166, 1143420]`; USGS: `[4329000.815389324, 1049161.5916794778, 4374122.782702505, 1108437.4109384015]`. Goudge si estende circa 21.75 m a ovest del TIFF: nessuna correzione o traslazione viene applicata; l'extent di rendering del gruppo include questa porzione. La registrazione del CRS esistente resta unica. La corrispondenza dei CRS vettoriali è un'inferenza dalla compatibilità spaziale, non una dichiarazione formale nei file.
+
+**Simbologia:** nessun QML/SLD/progetto QGIS o lookup cromatico è presente nel repository. I colori del TIFF restano originali. I vettori usano una rappresentazione provvisoria, esplicitata nella finestra “i”: colori categoriali riutilizzati per `Unit_Name` (Goudge) e `symbol` (USGS), fill al 14%, contorni Goudge tratteggiati sabbia da 1.25 px e contorni USGS continui grigio-azzurri da 1 px. Non vengono applicati gli stili o le classi ELEV delle isoipse. `Color_ID` viene conservato come attributo, senza inventare una relazione con colori ufficiali. I colori non esprimono priorità o valore scientifico. Gli stili sono memorizzati per categoria, non ricreati a ogni feature/frame.
+
+**Caricamento:** i due GeoJSON pesano circa 56 MB complessivi; vengono richiesti in parallelo solo alla prima attivazione. Il gruppo viene pubblicato dopo aver preparato entrambe le sorgenti e verificato i metadati del TIFF. Se viene disattivato durante il caricamento, il risultato rimane nascosto; le attivazioni successive riusano il gruppo e non richiedono nuovamente i GeoJSON. Attivare Geological Map nasconde le altre mappe; attivare un'altra mappa nasconde insieme tutti e tre i figli del gruppo geologico. Le altre sovrapposizioni già esistenti e i risultati del planner mantengono il proprio comportamento. Il cambio non modifica centro, risoluzione o configurazione geografica. Non vengono ricostruite geometrie o stili durante l'animazione/interazione.
+
+**Verifiche:** 39 test Node, inclusi metadati reali, attributi/geometrie originali, simbologia per categoria, caricamento differito, attivazioni ripetute, cambio mappa coordinato e disattivazione durante il caricamento. Browser sulla build di produzione a 1440 e 390 px: tre file caricati (GeoJSON HTTP 200, TIFF HTTP 206), una richiesta per GeoJSON; una sola viewport OpenLayers, centro e scala invariati, entrambe le sorgenti vettoriali visibili e selezionabili, tutte le geometrie nascoste con il gruppo, pan/zoom/reset e regressioni di Imagery/Elevation/Slope/Contour Lines. Selezioni reali controllate: USGS `fid=881`, “Jezero floor unit”; Goudge `fid=77`, “Dusty massive basement”. Nessun errore JavaScript, warning del browser o richiesta fallita nel percorso verificato. La build mantiene l'avviso sul chunk oltre 500 kB; il primo caricamento vettoriale può richiedere tempo e memoria, e non è un benchmark su tutti i dispositivi.
+
+File per l'integrazione: nuovi `src/layers/geology.js`, `src/layers/rasterGroup.js` e `tests/geology.test.js`; aggiornati `src/layers/contours.js`, `src/layers/manager.js`, `src/config/app.js`, `src/components/panels.js`, `src/main.js`, `app.html`, `tests/site.test.js` e questo README. Nessuna nuova dipendenza, modifica ai dati originali, commit, push o merge. Restano da fornire eventuali POI puntuali, stili geologici ufficiali/lookup e dichiarazioni formali del CRS dei vettori.
+
+Quote campionate da DEM, pendenze numeriche, difficoltà, profili e percorsi non vengono simulati.
+
+### Verifica locale
+
+```powershell
+cd frontend
+npm.cmd test
+npm.cmd run build
+npm.cmd run dev -- --host 127.0.0.1
+```
+
+Aprire l'URL stampato da Vite (normalmente `http://127.0.0.1:5173/app.html`). Controllare Jezero, trascinare, usare rotella e pulsanti +/−, quindi Reset view. Aprire Map Layers e provare Mars Imagery, Elevation e Slope, mantenendo attivo solo il raster desiderato oppure sovrapponendoli. Provare le tre opacità. Il cambio layer deve conservare posizione e zoom. Aprire Analysis, selezionare un punto e verificare coordinate metriche in MARS:JEZERO. Provare pannelli, Map Focus/ESC e Route Planner: A/B sono georeferenziati, il calcolo resta disabilitato senza backend.
+
+Verifica dei tre raster: 30 test Node superati (inclusi metadati reali di ogni file, equivalenza MARS/MARS:JEZERO e caricamento COG su HTTP Range), build multipagina e browser Chrome headless sia sul server Vite dev sia sulla preview di produzione. Rendering controllato a 1440, 768 e 390 px; pan con drag e tastiera, zoom in/out, reset, visibilità, opacità, pannelli, Map Focus/ESC, dialog e selezione A/B. Verificati cambio Imagery → Elevation → Slope → Imagery con centro e scala invariati, sovrapposizione indipendente e resa distinta dei tre raster. Nessun errore JavaScript; nella verifica di produzione tutti i COG hanno risposto HTTP 206 senza richieste fallite. La build mantiene l'avviso per un chunk applicativo oltre 500 kB, senza impedirne la produzione. I test browser sono una verifica di sviluppo; `npm test` esegue la suite Node. Touch e pinch su hardware fisico restano una verifica manuale; il layout mobile è stato controllato in emulazione browser.
+
+File aggiornati per Elevation e Slope: `src/config/app.js` (configurazioni RGBA condivise), `src/map/marsProjection.js` (MARS:JEZERO e alias MARS), `src/layers/cog.js` (messaggio di validazione comune), `src/main.js` (stati dei raster attivi), `app.html` (note sui tre layer), `tests/imagery.test.js` e questo README. Riutilizzati senza nuove istanze o adapter i moduli mappa, manager e pannelli esistenti. Nessuna nuova dipendenza e nessuna modifica ai dati GIS originali; nessun commit, push o merge.
 
 ## Organizzazione
 
@@ -76,8 +195,10 @@ src/
   style.css                Tema completo e stili OpenLayers utilizzati
   config/app.js            Contatti, team, regione, CRS, registry e backend
   config/project.js        Descrizioni e limiti dei layer
-  map/createMap.js         OpenLayers, griglia locale, selezione, resize
-  layers/manager.js        Adapter e gestione dei layer
+  map/createMap.js         OpenLayers, inquadratura, selezione, resize
+  map/marsProjection.js    CRS marziano e copertura verificata
+  layers/manager.js        Registry e gestione dei layer
+  layers/cog.js            Adapter GeoTIFF/WebGLTile
   components/              Shell, icone, layout e pannelli
   services/api.js          Adapter delle richieste di percorso
 tests/core.test.js         Fixture GIS, stato e test API
@@ -97,7 +218,7 @@ Ogni voce può dichiarare:
 {
   id: 'sites',
   name: 'Scientific Sites',
-  type: 'geojson',         // 'geojson' oppure 'xyz'; 'cog' non è supportato
+  type: 'geojson',         // 'geojson', 'xyz' oppure 'cog'
   icon: 'pin',
   sourceUrl: '/data/sites.geojson',
   crs: 'MARS:QGIS',        // Nome interno della proiezione VERIFICATA e registrata
@@ -122,27 +243,11 @@ Il CRS del layer e quello della vista devono coincidere oppure avere una trasfor
 
 Il manager espone `register`, `load`, `loadConfigured`, `setVisible`, `setOpacity`, `setOrder`, `setGeoJSON` e `clear`. `setOrder` controlla lo z-index dei layer dati; la selezione tecnica resta sopra i dati. Per aggiungere voci visibili nell'interfaccia, estendere `layerConfig` prima dell'avvio.
 
-## Configurare il CRS marziano
+## Configurare nuovi layer marziani
 
-In `appConfig.spatial`, impostare `local: false`, `code`, `units`, `extent`, `center` e i limiti di zoom in base ai dati verificati. Non esiste una scelta planetaria predefinita.
+`appConfig.spatial` usa `MARS:JEZERO` e la copertura del COG 01; `MARS` resta un alias compatibile. `registerProjections()` richiama `registerMarsProjection()` prima di creare la mappa. Non configurare layer marziani con EPSG:4326 o EPSG:3857 per aggirare errori.
 
-Nel metodo `registerProjections()` registrare la definizione verificata prima della creazione della mappa. Se tutti i dati hanno lo stesso CRS proiettato, OpenLayers può lavorare direttamente nelle relative coordinate:
-
-```js
-// Import da aggiungere a src/config/app.js:
-import Projection from 'ol/proj/Projection.js';
-import { addProjection } from 'ol/proj.js';
-
-// Corpo del metodo registerProjections(), dopo aver configurato spatial:
-addProjection(new Projection({
-  code: this.spatial.code,
-  units: this.spatial.units,
-  extent: this.spatial.extent,
-  global: false,
-}));
-```
-
-Questo registra coordinate e metadati; **non definisce una trasformazione matematica tra CRS diversi**. Per riproiezioni aggiungere separatamente definizioni planetarie verificate, per esempio tramite proj4 e la registrazione OpenLayers, o `addCoordinateTransforms`. Proj4 non è attualmente una dipendenza. La configurazione dei raggi planetari e delle trasformazioni compete alla verifica GIS dei dataset; nessun valore terrestre viene sostituito automaticamente.
+Prima di aggiungere un dataset, verificarne CRS, unità, extent, bande e risoluzioni. Configurare solo la sua voce di `layerConfig`: gli altri dataset restano scollegati. Per un COG usare `type: 'cog'`, `sourceUrl`, `crs`, `extent`, parametri di banda in `raster` e uno `style` coerente con le bande. La ricetta RGBA di Mars Imagery non va riutilizzata automaticamente per un DEM.
 
 ## Collegare FastAPI
 
@@ -165,7 +270,9 @@ Risposta:
 
 Il percorso restituito entra nel layer `routes`. Modificare o cancellare gli endpoint annulla la richiesta pendente e rimuove il percorso generato precedente. HTTP error, timeout, GeoJSON incompatibile e CRS sconosciuto producono uno stato di errore leggibile. Nessun FastAPI, A* o Dijkstra è incluso. Configurare CORS sul servizio; nessun segreto deve essere inserito nel frontend.
 
-## Verifiche e limiti
+## Verifiche storiche del redesign
+
+Questa sezione descrive lo stato precedente all'integrazione Mars Imagery; per lo stato attuale vedere la sezione dedicata sopra.
 
 Verifiche eseguite per il redesign:
 

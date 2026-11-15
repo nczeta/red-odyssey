@@ -1,30 +1,64 @@
 import { layerConfig } from './config/app.js';
 
-// The document is complete in HTML. Only live registry metadata is enhanced here.
-for (const entry of document.querySelectorAll('#layer-catalog [data-layer]')) {
-  const config = layerConfig.find(layer => layer.id === entry.dataset.layer);
-  if (!config) continue;
-  entry.querySelector('.catalog-availability').textContent = config.sourceUrl || config.data
-    ? 'Source configured · verification pending' : 'Pending integration';
-  for (const [label, value] of [['Data source', config.dataSource], ['Resolution', config.resolution], ['Units', config.units]]) {
-    const row = [...entry.querySelectorAll('dl > div')].find(row => row.querySelector('dt').textContent === label);
-    row.querySelector('dd').textContent = value
-      ? (typeof value === 'object' ? JSON.stringify(value) : value) : 'To be documented';
+export function initializeProjectPage(root = document, view = window) {
+  // Update only delivery metadata. Scientific provenance stays in the document.
+  for (const entry of root.querySelectorAll('#layer-catalog [data-layer]')) {
+    const config = layerConfig.find(layer => layer.id === entry.dataset.layer);
+    if (!config) continue;
+    for (const field of entry.querySelectorAll('[data-config-field]')) {
+      const value = config[field.dataset.configField];
+      if (value != null) field.textContent = typeof value === 'object' ? JSON.stringify(value) : value;
+    }
   }
-}
 
-// Native anchors work before this enhancement and when JavaScript is unavailable.
-const indexLinks = [...document.querySelectorAll('.project-index ol a')];
-if ('IntersectionObserver' in window) {
-  const visible = new Set();
-  const observer = new window.IntersectionObserver(entries => {
-    for (const entry of entries) entry.isIntersecting ? visible.add(entry.target.id) : visible.delete(entry.target.id);
-    const first = indexLinks.find(link => visible.has(link.hash.slice(1)));
-    if (first) for (const link of indexLinks) {
-      if (link === first) link.setAttribute('aria-current', 'location');
+  const links = [...root.querySelectorAll('.project-index ol a[href^="#"]')];
+  const sections = links.map(link => root.getElementById(link.hash.slice(1))).filter(Boolean);
+  if (!sections.length) return () => {};
+
+  const setActive = id => {
+    for (const link of links) {
+      const active = link.hash === `#${id}`;
+      link.classList.toggle('is-active', active);
+      if (active) link.setAttribute('aria-current', 'location');
       else link.removeAttribute('aria-current');
     }
-  }, { rootMargin: '-5% 0px -45% 0px' });
-  document.querySelectorAll('.document-section').forEach(section => observer.observe(section));
-  if (import.meta.hot) import.meta.hot.dispose(() => observer.disconnect());
+  };
+  const fromHash = () => {
+    const id = view.location.hash.slice(1);
+    setActive(sections.some(section => section.id === id) ? id : sections[0].id);
+  };
+  const updateFromScroll = () => {
+    frame = null;
+    const active = sections.filter(section => section.getBoundingClientRect().top <= view.innerHeight * 0.25).at(-1);
+    const atBottom = view.scrollY > 0 && view.scrollY + view.innerHeight >= root.documentElement.scrollHeight - 2;
+    setActive(atBottom ? sections.at(-1).id : (active ?? sections[0]).id);
+  };
+  let frame = null;
+  const scheduleUpdate = () => {
+    if (frame === null) frame = view.requestAnimationFrame(updateFromScroll);
+  };
+  const onClick = event => {
+    const link = event.target.closest('a[href^="#"]');
+    if (links.includes(link)) setActive(link.hash.slice(1));
+  };
+  fromHash();
+  const index = root.querySelector('.project-index');
+  index.addEventListener('click', onClick);
+  view.addEventListener('hashchange', fromHash);
+  view.addEventListener('scroll', scheduleUpdate, { passive: true });
+  view.addEventListener('resize', scheduleUpdate);
+  view.addEventListener('pageshow', scheduleUpdate);
+  return () => {
+    if (frame !== null) view.cancelAnimationFrame(frame);
+    index.removeEventListener('click', onClick);
+    view.removeEventListener('hashchange', fromHash);
+    view.removeEventListener('scroll', scheduleUpdate);
+    view.removeEventListener('resize', scheduleUpdate);
+    view.removeEventListener('pageshow', scheduleUpdate);
+  };
+}
+
+if (typeof document !== 'undefined' && typeof window !== 'undefined') {
+  const dispose = initializeProjectPage();
+  if (import.meta.hot) import.meta.hot.dispose(dispose);
 }
