@@ -85,6 +85,30 @@ cost = distance × (1 + (tan θ / tan θ₀)²)
 
 where `θ₀` is a reference slope derived from a detour factor `K` (default 5): the router accepts a path up to about `K` times longer to avoid the steepest traversable terrain. Slope therefore only adds cost below the limit, and above it the cell is a hard barrier.
 
+### Path smoothing
+
+The pathfinder moves between neighbouring pixels of the 20 m/px grid, so the raw route follows the grid and shows small staircase steps. For a cleaner geometry the route can be smoothed. The figures below compare the **original path** (red) with the **smoothed path** (white) over the slope map, where bluer areas are gentler and green to brown areas are steeper. Yellow dots are the waypoints, and the axes are DEM pixel coordinates (column on x, row on y).
+
+<p align="center">
+  <img src="docs/images/path-smoothing-overview.png" alt="Original and smoothed route across Jezero Crater, shown over the slope map" width="520">
+  <br>
+  <em>Full view of the route across Jezero Crater. At this scale the two paths are almost indistinguishable.</em>
+</p>
+
+<p align="center">
+  <img src="docs/images/path-smoothing-zoom-1.png" alt="Zoom on a stretch of the route, comparing original and smoothed paths" width="760">
+  <br>
+  <em>Zoom on a stretch of the route (columns 3550 to 4250, rows 2300 to 2800). The smoothed path follows the same corridor and only trims small detours.</em>
+</p>
+
+<p align="center">
+  <img src="docs/images/path-smoothing-zoom-2.png" alt="Pixel-level zoom showing the staircase original path and the straight smoothed path" width="760">
+  <br>
+  <em>Pixel-level zoom (about 200 px wide, roughly 4 km at 20 m/px). The original path steps along the grid cells, while the smoothed path replaces the steps with straight segments.</em>
+</p>
+
+Smoothing is applied for readability and display. It shifts the route by only a few pixels, so the overall corridor stays the same.
+
 ## Tech stack
 
 | Tool | Role |
