@@ -2,6 +2,7 @@ import numpy as np
 from skimage.graph import route_through_array
 import matplotlib.pyplot as plt
 from itertools import permutations
+import math
 
 from backend.dem import load_dem
 
@@ -135,32 +136,222 @@ def max_slope_on_path(g, paths):
     return np.degrees(np.arctan(g[rows, cols].max()))
 
 
+def segment_cost(a, b, mult, res):
+    """
+    caluclates the cost of the rect line that connects two points
+    returns np.inf if it goes across non-valid areas
+    """
+
+    rows, cols = mult.shape
+
+    def valid(r, c):
+        return 0 <= r < rows and 0 <= c < cols and np.isfinite(mult[r, c]) and mult[r, c] >= 1
+
+    r, c = a
+    end_r, end_c = b
+
+    if not valid(r, c) or not valid(end_r, end_c):
+        return math.inf
+
+    dr = end_r - r
+    dc = end_c - c
+
+    if dr == 0 and dc == 0:
+        return 0.0
+
+    length = math.hypot(dr, dc) * res
+
+    # Verso di attraversamento della griglia
+    sr = 1 if dr > 0 else -1 if dr < 0 else 0
+    sc = 1 if dc > 0 else -1 if dc < 0 else 0
+
+    # Parametri per attraversare le celle
+    delta_r = 1 / abs(dr) if dr else math.inf
+    delta_c = 1 / abs(dc) if dc else math.inf
+
+    next_r = delta_r / 2
+    next_c = delta_c / 2
+
+    t = 0.0
+    total_cost = 0.0
+
+    while t < 1:
+
+        # Prossimo bordo attraversato
+        next_t = min(next_r, next_c, 1.0)
+
+        # Lunghezza percorsa nella cella corrente
+        distance = (next_t - t) * length
+
+        total_cost += distance * float(mult[r, c])
+
+        if next_t >= 1.0 - 1e-12:
+            break
+
+        # Attraversamento esatto di un angolo
+        if abs(next_r - next_c) < 1e-12:
+
+            # Evitiamo di tagliare angoli bloccati
+            if not valid(r + sr, c):
+                return math.inf
+
+            if not valid(r, c + sc):
+                return math.inf
+
+            r += sr
+            c += sc
+
+            next_r += delta_r
+            next_c += delta_c
+
+        elif next_r < next_c:
+            r += sr
+            next_r += delta_r
+
+        else:
+            c += sc
+            next_c += delta_c
+
+        if not valid(r, c):
+            return math.inf
+
+        t = next_t
+
+    return total_cost
+
+
+def smooth_path(path, mult, res, max_lookahead=48):
+    """
+    Semplifica un percorso cercando collegamenti
+    diretti tra punti non consecutivi.
+
+    Accetta una scorciatoia soltanto se il costo
+    non aumenta.
+    """
+
+    path = [tuple(p) for p in path]
+
+    if len(path) < 2:
+        return path
+
+    if max_lookahead < 1:
+        raise ValueError("max_lookahead deve essere >= 1")
+
+    # Costi cumulativi del percorso originale
+    prefix = [0.0]
+
+    for a, b in zip(path, path[1:]):
+        d = math.dist(a, b) * res
+        penalty = (float(mult[a]) + float(mult[b])) / 2
+
+        prefix.append(prefix[-1] + d * penalty)
+
+    smoothed = [path[0]]
+
+    i = 0
+
+    while i < len(path) - 1:
+
+        best = i + 1
+
+        limit = min(
+            i + max_lookahead,
+            len(path) - 1
+        )
+
+        # Prova prima il punto più lontano
+        for j in range(limit, i, -1):
+
+            shortcut_cost = segment_cost(
+                path[i], path[j], mult, res
+            )
+
+            original_cost = prefix[j] - prefix[i]
+
+            tolerance = 1e-8 * max(1, original_cost)
+
+            if shortcut_cost <= original_cost + tolerance:
+                best = j
+                break
+
+        # Anche un passo originale deve essere valido
+        if not math.isfinite(
+                segment_cost(path[i], path[best], mult, res)
+        ):
+            raise ValueError("Il percorso attraversa un angolo bloccato")
+
+        smoothed.append(path[best])
+        i = best
+
+    return smoothed
+
+
 if __name__ == "__main__":
-    # calculate the slope
+    # get the dem from the geotiff image
+    dem = load_dem("../assets/M20_JezeroCrater_CTXDEM_20m.tif")
+
+    # compute the gradient of the whole dem
     g = compute_slope(dem)
 
     # get the valid map
     valid_map = get_valid_map(g)
-    # check how much of the map is explorable
-    print(np.count_nonzero(valid_map) / valid_map.size)
 
-    # compute the path
-    points = [(200, 200), (4000, 4000), (300, 1300), (2400, 4000)]
+    # get the mult of the entire dem
+    mult = compute_mult(g, valid_map, G0)
+
+    # test waypoints
+    points = [
+        (200, 200),
+        (4000, 4000),
+        (300, 1300),
+        (2400, 4000)
+    ]
+
+    # reorder the points
     points = reorder_points(valid_map, points)
 
-    mult = compute_mult(g, valid_map, G0)
+    # get the original paths
     paths, costs = find_path(points, mult, dem.res[0])
-    print(max_slope_on_path(g, paths))
 
-    # displays the map
-    plt.imshow(np.degrees(np.arctan(g)))
-    # displays the path (one line per segment)
+    # apply the smoothing
+    smoothed_paths = []
     for path in paths:
-        rows, cols = zip(*path)
-        plt.plot(cols, rows, "r", linewidth=1)
+        smoothed = smooth_path(path, mult, dem.res[0], max_lookahead=48)
+        smoothed_paths.append(smoothed)
 
-    # displays the waypoints (once, all together)
+    # compare the pixelated path and the smoothed out one
+    for i, (original, smoothed) in enumerate(zip(paths, smoothed_paths)):
+        old_distance = sum(math.dist(a, b) * dem.res[0] for a, b in zip(original, original[1:]))
+
+        new_distance = sum(math.dist(a, b) * dem.res[0] for a, b in zip(smoothed, smoothed[1:]))
+
+        new_cost = sum(segment_cost(a, b, mult, dem.res[0]) for a, b in zip(smoothed, smoothed[1:]))
+
+        print(f"\nPath {i + 1}")
+        print(f"Original distance: {old_distance:.2f} m")
+        print(f"Smoothed distance: {new_distance:.2f} m")
+        print(f"Original cost: {costs[i]:.2f}")
+        print(f"Smoothed cost: {new_cost:.2f}")
+
+    # plotting the info
+    # 1. show the gradient
+    plt.imshow(np.degrees(np.arctan(g)), cmap="terrain")
+
+    # 2. original path
+    for i, path in enumerate(paths):
+        rows, cols = zip(*path)
+        plt.plot(cols, rows, color="red", linewidth=2, label="Original" if i == 0 else None)
+
+    # 3. smoothed path
+    for i, path in enumerate(smoothed_paths):
+        rows, cols = zip(*path)
+        plt.plot(cols, rows, color="white", linewidth=1, label="Smoothed" if i == 0 else None)
+
+    # 4. waypoints
     rows, cols = zip(*points)
-    plt.scatter(cols, rows, c="red", s=10, zorder=3)
-    # show the graph
+    plt.scatter(cols, rows, color="yellow", s=30, zorder=3, label="Waypoints")
+
+    # 5. show the graph
+    plt.title("Original path vs smoothed path")
+    plt.legend()
     plt.show()
