@@ -1,625 +1,863 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="theme-color" content="#eee9e1">
-    <meta name="description" content="The science and architecture behind Red Odyssey: planned planetary datasets, terrain analysis, routing, technologies and team.">
-    <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
-    <link rel="icon" type="image/svg+xml" sizes="any" href="/images/red-odyssey-logo.svg">
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="stylesheet" href="/src/style.css">
-    <link rel="preload" as="font" type="font/woff2" href="/node_modules/@fontsource/ibm-plex-sans-condensed/files/ibm-plex-sans-condensed-latin-500-normal.woff2" crossorigin="">
-    <title>
-      Our Project — RED ODYSSEY
-    </title>
-  </head>
-  <body class="page-project">
-    <a class="skip-link" href="#main-content">Skip to content</a>
-    <header class="site-header">
-      <div class="site-header-inner page-width">
-        <a class="site-brand" href="./index.html" aria-label="Red Odyssey home"><img class="official-logo site-mark" src="/images/red-odyssey-logo.svg" alt="" width="180" height="180"><span>RED<br>ODYSSEY</span></a>
-        <nav class="site-nav" aria-label="Main navigation">
-          <a href="./index.html">Home</a>
-          <a href="./project.html" aria-current="page">The Project</a>
-          <a class="nav-launch" href="./app.html">Open Explorer <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16m-6-6 6 6-6 6"></path></svg></a>
-        </nav>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#eee9e1">
+  <meta name="description"
+    content="The science and architecture behind Red Odyssey: Martian imagery, terrain analysis, route planning, technologies and team.">
+  <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+  <link rel="icon" type="image/svg+xml" sizes="any" href="/images/red-odyssey-logo.svg">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="stylesheet" href="/src/style.css">
+  <link rel="preload" as="font" type="font/woff2"
+    href="/node_modules/@fontsource/ibm-plex-sans-condensed/files/ibm-plex-sans-condensed-latin-500-normal.woff2"
+    crossorigin="">
+  <title>
+    Our Project — RED ODYSSEY
+  </title>
+
+</head>
+
+<body class="page-project">
+  <a class="skip-link" href="#main-content">Skip to content</a>
+  <header class="site-header">
+    <div class="site-header-inner page-width">
+      <a class="site-brand" href="./index.html" aria-label="Red Odyssey home"><img class="official-logo site-mark"
+          src="/images/red-odyssey-logo.svg" alt="" width="180" height="180"><span>RED<br>ODYSSEY</span></a>
+      <nav class="site-nav" aria-label="Main navigation">
+        <a href="./index.html">Home</a>
+        <a href="./project.html" aria-current="page">The Project</a>
+        <a class="nav-launch" href="./app.html">Open Explorer <svg class="icon" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4 12h16m-6-6 6 6-6 6"></path>
+          </svg></a>
+      </nav>
+    </div>
+  </header>
+  <main id="main-content" tabindex="-1">
+    <header class="project-cover page-width">
+      <div class="running-line">
+        <span>RED ODYSSEY / PROJECT NOTES</span>
+        <a href="./app.html">Open the explorer <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4 12h16m-6-6 6 6-6 6"></path>
+          </svg></a>
+      </div>
+      <h1>The landscape.<br>The science.<br><span>The journey.</span></h1>
+      <div class="project-cover-bottom">
+        <p>Explore Mars.<br>Understand its terrain.<br>Plan the journey.</p>
+        <span><a href="https://www.spaceappschallenge.org/2026/challenges/interplanetary-survival-guide-martian-map/"
+            target="_blank" rel="noopener noreferrer">NASA Space Apps Challenge 2026</a><br>Martian Map · Educational
+          project</span>
       </div>
     </header>
-    <main id="main-content" tabindex="-1">
-      <header class="project-cover page-width">
-        <div class="running-line">
-          <span>RED ODYSSEY / PROJECT NOTES</span>
-          <a href="./app.html">Open the explorer <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16m-6-6 6 6-6 6"></path></svg></a>
-        </div>
-        <h1>The landscape.<br>The science.<br><span>The journey.</span></h1>
-        <div class="project-cover-bottom">
-          <p>A digital atlas for asking better questions about Martian terrain.</p>
-          <span>NASA Space Apps Challenge 2026<br>Martian Map · Educational project</span>
-        </div>
-      </header>
-      <div class="project-body page-width">
-        <nav class="project-index" aria-label="Project sections">
-          <span class="section-index">IN THIS DOCUMENT</span>
-          <ol>
+    <div class="project-body page-width">
+      <nav class="project-index" aria-label="Project sections">
+        <span class="section-index">IN THIS DOCUMENT</span>
+        <ol>
+          <li>
+            <a href="#overview">Project overview</a>
+          </li>
+          <li>
+            <a href="#how-it-works">How it works</a>
+          </li>
+          <li>
+            <a href="#maps-layers">Maps &amp; layers</a>
+          </li>
+          <li>
+            <a href="#terrain-analysis">Terrain analysis</a>
+          </li>
+          <li>
+            <a href="#route-planning">Route planning</a>
+          </li>
+          <li>
+            <a href="#technologies">Technologies</a>
+          </li>
+          <li>
+            <a href="#sources">Sources &amp; credits</a>
+          </li>
+          <li>
+            <a href="#team">The team</a>
+          </li>
+        </ol>
+        <a class="index-explore" href="./app.html">Explore Map <svg class="icon" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4 12h16m-6-6 6 6-6 6"></path>
+          </svg></a>
+      </nav>
+      <div class="project-article">
+        <section id="overview" class="document-section" aria-labelledby="overview-title">
+          <span class="section-index">01 / PROJECT OVERVIEW</span>
+          <h2 id="overview-title">Making Martian terrain<br>understandable.</h2>
+          <p class="lead">Exploring a planet means understanding not only its landmarks, but also the terrain that
+            connects them.</p>
+          <p>Red Odyssey is an interactive planetary exploration platform focused on the Martian surface. By combining
+            orbital imagery, topographic data and geospatial analysis, it provides an integrated environment for
+            investigating the landscape and exploring possible routes across the terrain.</p>
+          <p>By bringing different sources of planetary data into one environment, Red Odyssey connects surface
+            observation with terrain analysis and route planning. Users can explore geographical features, compare
+            spatial information and investigate how topography influences possible exploration paths.</p>
+        </section>
+        <section id="how-it-works" class="document-section" aria-labelledby="workflow-title">
+          <span class="section-index">02 / HOW IT WORKS</span>
+
+          <h2 id="workflow-title">From observation<br>to exploration.</h2>
+
+          <p>Red Odyssey brings together planetary observations, geospatial processing and interactive mapping to
+            transform Martian data into an environment for scientific exploration.</p>
+
+          <ol class="workflow">
             <li>
-              <a href="#overview">Overview</a>
+              <span class="workflow-number">01</span>
+              <div>
+                <h3>Planetary observations</h3>
+                <p>Collecting and integrating orbital imagery and elevation datasets to build a detailed representation
+                  of the Martian surface.</p>
+              </div>
             </li>
+
             <li>
-              <a href="#how-it-works">How it works</a>
+              <span class="workflow-number">02</span>
+              <div>
+                <h3>GIS &amp; terrain processing</h3>
+                <p>Processing geospatial data, aligning coordinate systems and deriving terrain information through QGIS
+                  and Python.</p>
+              </div>
             </li>
+
             <li>
-              <a href="#maps-layers">Maps &amp; layers</a>
+              <span class="workflow-number">03</span>
+              <div>
+                <h3>Geospatial layers</h3>
+                <p>Organizing imagery, elevation models and derived terrain products into interoperable map layers.</p>
+              </div>
             </li>
+
             <li>
-              <a href="#terrain-analysis">Terrain analysis</a>
+              <span class="workflow-number">04</span>
+              <div>
+                <h3>Interactive exploration</h3>
+                <p>Exploring the Martian landscape through OpenLayers, with interactive navigation, layer management and
+                  spatial inspection.</p>
+              </div>
             </li>
+
             <li>
-              <a href="#route-planning">Route planning</a>
-            </li>
-            <li>
-              <a href="#technologies">Technologies</a>
-            </li>
-            <li>
-              <a href="#sources">Sources &amp; credits</a>
-            </li>
-            <li>
-              <a href="#team">The team</a>
+              <span class="workflow-number">05</span>
+              <div>
+                <h3>Intelligent route planning</h3>
+                <p>Developing a terrain-aware routing workflow to evaluate terrain costs and identify possible exploration routes.
+                </p>
+              </div>
             </li>
           </ol>
-          <a class="index-explore" href="./app.html">Explore Map <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16m-6-6 6 6-6 6"></path></svg></a>
+        </section>
+        <section id="maps-layers" class="document-section layer-catalog" aria-labelledby="catalog-title">
+          <span class="section-index">03 / MAPS &amp; LAYERS</span>
+
+          <h2 id="catalog-title">One landscape.<br>Five ways to read it.</h2>
+
+          <p class="catalog-intro">
+            Five complementary perspectives on Jezero Crater, combining orbital observations,
+            topographic data and derived geospatial products to investigate the Martian landscape.
+          </p>
+
+          <div id="layer-catalog">
+
+            <!-- 01 ORBITAL IMAGERY & HILLSHADE -->
+            <article class="catalog-entry" data-layer="imagery">
+              <div class="catalog-entry-heading">
+                <span class="catalog-number">01</span>
+                <div>
+                  <span class="catalog-category">Orbital observation &amp; derived visualization</span>
+                  <h3>Orbital Imagery &amp; Hillshade</h3>
+                </div>
+              </div>
+
+              <p>
+                An orbital view of Jezero Crater based on a 5 m/pixel CTX orthomosaic, complemented by a
+                multidirectional hillshade generated from elevation data to reveal
+                surface morphology through simulated illumination. The explorer serves a rendered 20 m/pixel map.
+              </p>
+              <details>
+                <summary>
+                  Scientific notes &amp; provenance
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 5v14M5 12h14"></path>
+                  </svg>
+                </summary>
+
+                <dl>
+                  <div>
+                    <dt>Scientific purpose</dt>
+                    <dd>
+                      Visualize the surface of Jezero Crater through orbital observations
+                      and shaded-relief interpretation, providing geographical context
+                      for geological features and landscape morphology.
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>Orbital imagery source</dt>
+                    <dd>
+                      CTX orthomosaic, Mars 2020 Jezero Crater,
+                      JPL Science Investigation Maps, USGS Astrogeology.
+                      <br>
+                      <a href="https://planetarymaps.usgs.gov/mosaic/mars2020_trn/CTX/ScienceInvestigationMaps_JPL/M20_JezeroCrater_CTXortho_mosaic_5m.tif"
+                        target="_blank" rel="noopener noreferrer">
+                        View original CTX orthomosaic
+                      </a>
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>Imagery resolution</dt>
+                    <dd>5 metres per pixel (m/px).</dd>
+                  </div>
+
+                  <div>
+                    <dt>Hillshade source</dt>
+                    <dd>
+                      Derived from the CTX Digital Elevation Model provided by
+                      USGS Astrogeology.
+                      <br>
+                      <a href="https://planetarymaps.usgs.gov/mosaic/mars2020_trn/CTX/ScienceInvestigationMaps_JPL/M20_JezeroCrater_CTXDEM_20m.tif"
+                        target="_blank" rel="noopener noreferrer">
+                        View source DEM
+                      </a>
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>Hillshade resolution</dt>
+                    <dd>20 metres per pixel (m/px).</dd>
+                  </div>
+
+                  <div>
+                    <dt>Processing methodology</dt>
+                    <dd>
+                      Generated in QGIS using multidirectional artificial illumination.
+                      Multiple simulated light directions enhance the visibility of
+                      surface morphology and topographic features.
+                    </dd>
+                  </div>
+                <div>
+                    <dt>Explorer delivery</dt>
+                    <dd><span data-config-field="resolution">20 m/pixel</span> · <span data-config-field="units">RGBA (8-bit)</span>.
+                      Rendered visualization; source measurements are documented separately.</dd>
+                  </div>
+                </dl>
+              </details>
+            </article>
+
+            <!-- 02 DIGITAL ELEVATION MODEL -->
+            <article class="catalog-entry" data-layer="elevation">
+              <div class="catalog-entry-heading">
+                <span class="catalog-number">02</span>
+                <div>
+                  <span class="catalog-category">Elevation data</span>
+                  <h3>Digital Elevation Model</h3>
+                </div>
+              </div>
+
+              <p>
+                A color visualization based on a numerical representation of Jezero Crater's surface elevation,
+                allowing users to compare topographic variations and understand
+                the vertical structure of the Martian terrain.
+              </p>
+              <details>
+                <summary>
+                  Scientific notes &amp; provenance
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 5v14M5 12h14"></path>
+                  </svg>
+                </summary>
+
+                <dl>
+                  <div>
+                    <dt>Scientific purpose</dt>
+                    <dd>
+                      Represent and explore elevation variations across Jezero Crater,
+                      providing the topographic foundation for further terrain analysis.
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>Data source</dt>
+                    <dd>
+                      CTX Digital Elevation Model, Mars 2020 Jezero Crater,
+                      JPL Science Investigation Maps, USGS Astrogeology.
+                      <br>
+                      <a href="https://planetarymaps.usgs.gov/mosaic/mars2020_trn/CTX/ScienceInvestigationMaps_JPL/M20_JezeroCrater_CTXDEM_20m.tif"
+                        target="_blank" rel="noopener noreferrer">
+                        View original DEM dataset
+                      </a>
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>Spatial resolution</dt>
+                    <dd>20 metres per pixel (m/px).</dd>
+                  </div>
+
+                  <div>
+                    <dt>Measurement units</dt>
+                    <dd>Metres (m).</dd>
+                  </div>
+                <div>
+                    <dt>Explorer delivery</dt>
+                    <dd><span data-config-field="resolution">20 m/pixel</span> · <span data-config-field="units">RGBA (8-bit)</span>.
+                      Rendered visualization; source measurements are documented separately.</dd>
+                  </div>
+                </dl>
+              </details>
+            </article>
+
+            <!-- 03 CONTOUR LINES -->
+            <article class="catalog-entry" data-layer="contours">
+              <div class="catalog-entry-heading">
+                <span class="catalog-number">03</span>
+                <div>
+                  <span class="catalog-category">Derived topographic product</span>
+                  <h3>Contour Lines</h3>
+                </div>
+              </div>
+
+              <p>
+                Elevation contour lines derived from the Jezero Crater DEM in QGIS,
+                connecting locations of equal elevation at 200-metre intervals.
+              </p>
+              <details>
+                <summary>
+                  Scientific notes &amp; provenance
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 5v14M5 12h14"></path>
+                  </svg>
+                </summary>
+
+                <dl>
+                  <div>
+                    <dt>Scientific purpose</dt>
+                    <dd>
+                      Provide an alternative representation of the crater's elevation
+                      profile, making topographic patterns and changes in surface form
+                      easier to interpret.
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>Source dataset</dt>
+                    <dd>
+                      CTX Digital Elevation Model, USGS Astrogeology.
+                      <br>
+                      <a href="https://planetarymaps.usgs.gov/mosaic/mars2020_trn/CTX/ScienceInvestigationMaps_JPL/M20_JezeroCrater_CTXDEM_20m.tif"
+                        target="_blank" rel="noopener noreferrer">
+                        View source DEM
+                      </a>
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>Processing methodology</dt>
+                    <dd>
+                      Generated from the elevation model using QGIS contour generation tools.
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>Contour interval</dt>
+                    <dd>200 metres.</dd>
+                  </div>
+
+                  <div>
+                    <dt>Measurement units</dt>
+                    <dd>Metres (m).</dd>
+                  </div>
+                <div>
+                    <dt>Explorer delivery</dt>
+                    <dd><span data-config-field="resolution">20 m/pixel</span> · <span data-config-field="units">ELEV (m)</span>.
+                      Rendered visualization; source measurements are documented separately.</dd>
+                  </div>
+                </dl>
+              </details>
+            </article>
+
+            <!-- 04 SCIENTIFIC SITES -->
+            <article class="catalog-entry" data-layer="sites">
+              <div class="catalog-entry-heading">
+                <span class="catalog-number">04</span>
+                <div>
+                  <span class="catalog-category">Scientific reference features</span>
+                  <h3>Scientific Sites</h3>
+                </div>
+              </div>
+
+              <p>
+                Geographical reference points selected for their scientific relevance,
+                highlighting locations of interest across the Jezero Crater region.
+              </p>
+              <details>
+                <summary>
+                  Scientific notes &amp; provenance
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 5v14M5 12h14"></path>
+                  </svg>
+                </summary>
+
+                <dl>
+                  <div>
+                    <dt>Scientific purpose</dt>
+                    <dd>
+                      Identify and visualize geographical locations of scientific
+                      interest, connecting spatial exploration with relevant
+                      planetary features and research areas.
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>Reference material</dt>
+                    <dd>
+                      NASA materials provided for the NASA Space Apps Challenge 2026.
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>Geographic reference</dt>
+                    <dd>
+                      USGS ArcGIS Web Application.
+                      <br>
+                      <a href="https://usgs.maps.arcgis.com/apps/webappviewer/index.html?id=a0ae4b521f7a4a6ca2cf0f0c551d5293"
+                        target="_blank" rel="noopener noreferrer">
+                        View geographic reference
+                      </a>
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>Selection methodology</dt>
+                    <dd>
+                      Locations selected according to their scientific interest
+                      within the Jezero Crater region.
+                    </dd>
+                  </div>
+                </dl>
+              </details>
+            </article>
+
+            <!-- 05 SLOPE MAP -->
+            <article class="catalog-entry" data-layer="slope">
+              <div class="catalog-entry-heading">
+                <span class="catalog-number">05</span>
+                <div>
+                  <span class="catalog-category">Derived terrain analysis</span>
+                  <h3>Slope Map</h3>
+                </div>
+              </div>
+
+              <p>
+                A terrain slope visualization derived from the Jezero Crater DEM in QGIS.
+                The explorer preserves the supplied color scale, from the least steep
+                to the steepest terrain. The rendered map does not expose numeric slope values.
+              </p>
+              <details>
+                <summary>
+                  Scientific notes &amp; provenance
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 5v14M5 12h14"></path>
+                  </svg>
+                </summary>
+
+                <dl>
+                  <div>
+                    <dt>Scientific purpose</dt>
+                    <dd>
+                      Visualize variations in terrain steepness across Jezero Crater
+                      and support the interpretation of surface inclination.
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>Source dataset</dt>
+                    <dd>
+                      CTX Digital Elevation Model, USGS Astrogeology.
+                      <br>
+                      <a href="https://planetarymaps.usgs.gov/mosaic/mars2020_trn/CTX/ScienceInvestigationMaps_JPL/M20_JezeroCrater_CTXDEM_20m.tif"
+                        target="_blank" rel="noopener noreferrer">
+                        View source DEM
+                      </a>
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>Processing methodology</dt>
+                    <dd>
+                      Derived from the elevation model using QGIS terrain analysis tools.
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>Spatial resolution</dt>
+                    <dd>20 metres per pixel (m/px).</dd>
+                  </div>
+
+                  <div>
+                    <dt>Measurement units</dt>
+                    <dd>Degrees (°).</dd>
+                  </div>
+
+                  <div>
+                    <dt>Visual interpretation</dt>
+                    <dd>
+                      Use the explorer legend to read the supplied color scale from least steep
+                      to steepest. Numeric thresholds are not encoded in the rendered raster.
+                    </dd>
+                  </div>
+                <div>
+                    <dt>Explorer delivery</dt>
+                    <dd><span data-config-field="resolution">20 m/pixel</span> · <span data-config-field="units">RGBA (8-bit)</span>.
+                      Rendered visualization; source measurements are documented separately.</dd>
+                  </div>
+                </dl>
+              </details>
+            </article>
+
+          </div>
+        </section>
+        <section id="terrain-analysis" class="document-section" aria-labelledby="terrain-title">
+          <span class="section-index">04 / TERRAIN ANALYSIS</span>
+          <h2 id="terrain-title">Understanding the shape<br>of Martian terrain.</h2>
+          <p>The terrain analysis is based on the CTX Digital Elevation Model of Jezero Crater, with a spatial
+            resolution of 20 metres per pixel. The DEM is used to derive complementary views of the surface in QGIS:
+            hillshade, elevation contours and slope.</p>
+          <dl class="analysis-definitions">
+            <div>
+              <dt>Elevation &amp; relief</dt>
+              <dd>The Digital Elevation Model represents surface elevation in metres and provides the topographic
+                basis for the other derived products.</dd>
+            </div>
+            <div>
+              <dt>Slope</dt>
+              <dd>Calculated from the DEM in QGIS. The explorer displays the supplied color visualization,
+                with a qualitative legend from least steep to steepest terrain; numeric slope values are not available.</dd>
+            </div>
+            <div>
+              <dt>Contour lines</dt>
+              <dd>Generated from the same DEM in QGIS at 200-metre intervals. Each contour connects locations
+                with the same elevation.</dd>
+            </div>
+            <div>
+              <dt>Hillshade</dt>
+              <dd>Derived from the DEM in QGIS using multidirectional simulated illumination. It helps reveal
+                surface morphology, but does not represent real lighting conditions or a photograph.</dd>
+            </div>
+          </dl>
+          <aside class="editorial-note warning-note">
+            <strong>Terrain interpretation is not a safety certification.</strong>
+            <p>These products describe selected topographic properties of the study area. They do not, on their own,
+              establish rover traversability, route safety or operational suitability.</p>
+          </aside>
+        </section>
+        <section id="route-planning" class="document-section" aria-labelledby="routing-title">
+          <span class="section-index">05 / ROUTE PLANNING</span>
+
+          <h2 id="routing-title">Between two points,<br>the terrain matters.</h2>
+
+          <p>
+            Route planning aims to connect a starting point and a destination while
+            accounting for the characteristics of the Martian terrain. By combining
+            elevation data and terrain-derived information, the system is designed
+            to support the evaluation of possible paths across Jezero Crater.
+          </p>
+
+          <div class="route-explanation">
+            <span class="route-letter">A</span>
+            <div>
+              <h3>Define the question</h3>
+              <p>
+                Define a starting point and a destination within the mapped area.
+                These two endpoints establish the spatial framework for the
+                route-planning process.
+              </p>
+            </div>
+          </div>
+
+          <div class="route-explanation">
+            <span class="route-letter">↳</span>
+            <div>
+              <h3>Evaluate the terrain</h3>
+              <p>
+                Terrain information will be used to assess the characteristics
+                of the landscape between the selected endpoints. This step is
+                intended to provide the foundation for evaluating route feasibility.
+              </p>
+            </div>
+          </div>
+
+          <div class="route-explanation">
+            <span class="route-letter">B</span>
+            <div>
+              <h3>Interpret the result</h3>
+              <p>
+                The planned output includes a geographic route representation
+                and relevant metrics, such as distance and elevation changes.
+                These results will make it possible to interpret and compare
+                potential paths.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section id="technologies" class="document-section" aria-labelledby="technologies-title">
+          <span class="section-index">06 / TECHNOLOGIES</span>
+          <h2 id="technologies-title">A focused toolset.</h2>
+          <dl class="technology-list">
+            <div>
+              <dt>OpenLayers</dt>
+              <dd>Map rendering, interactions and geospatial layer management.</dd>
+            </div>
+            <div>
+              <dt>JavaScript</dt>
+              <dd>Native ES Modules, shared page components and application state.</dd>
+
+            </div>
+            <div>
+              <dt>Vite</dt>
+              <dd>Local development and a three-page production build.</dd>
+
+            </div>
+            <div>
+              <dt>QGIS</dt>
+              <dd>Terrain processing, hillshade generation, contour extraction and slope analysis.</dd>
+
+            </div>
+            <div>
+              <dt>Python</dt>
+              <dd>Planned terrain processing and route-cost analysis.</dd>
+
+            </div>
+            <div>
+              <dt>FastAPI</dt>
+              <dd>Planned interface between the explorer and Python routing.</dd>
+
+            </div>
+            <div>
+              <dt>Codex</dt>
+              <dd>Used for building the web application.</dd>
+
+            </div>
+            <div>
+              <dt>ChatGPT</dt>
+              <dd>Used for brainstorming, technical research, learning new technologies, exploring scientific concepts,
+                and supporting architectural and design decisions.</dd>
+
+            </div>
+          </dl>
+        </section>
+        <section id="sources" class="document-section" aria-labelledby="sources-title">
+          <span class="section-index">07 / DATA SOURCES &amp; CREDITS</span>
+
+          <h2 id="sources-title">Every layer needs<br>a traceable source.</h2>
+
+          <p>
+            Red Odyssey uses CTX orbital imagery and elevation data of Jezero Crater
+            provided by USGS Astrogeology. Additional terrain products, including
+            hillshade, contour lines and slope maps, are derived from the original
+            elevation model through processing in QGIS.
+          </p>
+
+          <p>The explorer distributes rendered 20 m/pixel maps and contour vectors.
+            The imagery source resolution is 5 m/pixel; elevation and slope colors are visualizations,
+            rather than numeric measurements sampled by the browser.</p>
+
+          <div class="source-register project-source-register">
+            <span>Primary geospatial datasets</span>
+
+            <strong>CTX orthomosaic · 5 m/px</strong>
+            <a href="https://planetarymaps.usgs.gov/mosaic/mars2020_trn/CTX/ScienceInvestigationMaps_JPL/M20_JezeroCrater_CTXortho_mosaic_5m.tif"
+              target="_blank" rel="noopener noreferrer">
+              USGS Astrogeology · View orthomosaic
+            </a>
+
+            <strong>CTX Digital Elevation Model · 20 m/px</strong>
+            <a href="https://planetarymaps.usgs.gov/mosaic/mars2020_trn/CTX/ScienceInvestigationMaps_JPL/M20_JezeroCrater_CTXDEM_20m.tif"
+              target="_blank" rel="noopener noreferrer">
+              USGS Astrogeology · View elevation model
+            </a>
+          </div>
+
+          <p>
+            Scientific Sites is documented here as reference material; a point-site layer is not connected to the explorer. The references include materials provided for the
+            NASA Space Apps Challenge 2026 and the
+            <a href="https://usgs.maps.arcgis.com/apps/webappviewer/index.html?id=a0ae4b521f7a4a6ca2cf0f0c551d5293"
+              target="_blank" rel="noopener noreferrer">USGS ArcGIS geographic reference</a>.
+            NASA and USGS are acknowledged as source and reference providers.
+            This project is independently developed and is not affiliated with,
+            approved or endorsed by NASA or USGS.
+          </p>
+
+          <div class="reference-links" id="reference-links">
+            <a href="https://science.nasa.gov/mars/" target="_blank" rel="noopener noreferrer">
+              NASA · Mars exploration
+              <svg class="icon external-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M4 12h16m-6-6 6 6-6 6"></path>
+              </svg>
+              <span class="visually-hidden"> (opens in a new tab)</span>
+            </a>
+
+            <a href="https://pds.nasa.gov/" target="_blank" rel="noopener noreferrer">
+              NASA · Planetary Data System
+              <svg class="icon external-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M4 12h16m-6-6 6 6-6 6"></path>
+              </svg>
+              <span class="visually-hidden"> (opens in a new tab)</span>
+            </a>
+          </div>
+
+          <p class="technical-caption">
+            Typography: IBM Plex Sans Condensed and Inter, distributed locally
+            under their accompanying font licenses.
+          </p>
+        </section>
+
+
+        <section id="team" class="document-section team-section" aria-labelledby="team-title">
+          <span class="section-index">08 / THE TEAM</span>
+
+          <h2 id="team-title">Six people.<br>A shared field of view.</h2>
+
+          <p>Meet the people behind Red Odyssey.</p>
+
+          <ol id="team-list" class="team-list">
+            <li>
+              <span class="team-number">01</span>
+              <div>
+                <h3>Niccolò Zampini</h3>
+                <p class="team-links">
+                  <a href="https://nc-zampini.vercel.app" target="_blank" rel="noopener noreferrer">Portfolio</a>
+                  <a href="https://github.com/nczeta" target="_blank" rel="noopener noreferrer">GitHub</a>
+                  <a href="https://www.linkedin.com/in/niccol%C3%B2-zampini-926763433/"
+                    target="_blank" rel="noopener noreferrer">LinkedIn</a>
+                </p>
+              </div>
+            </li>
+
+            <li>
+              <span class="team-number">02</span>
+              <div>
+                <h3>Karim Omar Zoubir</h3>
+                <p class="team-links">
+                  <a href="https://github.com/Mirak-labs" target="_blank" rel="noopener noreferrer">GitHub</a>
+                </p>
+              </div>
+            </li>
+
+            <li>
+              <span class="team-number">03</span>
+              <div>
+                <h3>Filippo Pavone</h3>
+                <p class="team-links">
+                  <a href="https://pippz.github.io/" target="_blank" rel="noopener noreferrer">Portfolio</a>
+                  <a href="https://github.com/pippz" target="_blank" rel="noopener noreferrer">GitHub</a>
+                </p>
+              </div>
+            </li>
+
+            <li>
+              <span class="team-number">04</span>
+              <div>
+                <h3>Pietro Adami Martinez</h3>
+                <p class="team-links">
+                  <a href="https://linktr.ee/ie74.art" target="_blank" rel="noopener noreferrer">Linktree</a>
+                </p>
+              </div>
+            </li>
+
+            <li>
+              <span class="team-number">05</span>
+              <div>
+                <h3>Shenal Ferdin Croos Warnakulasuriya</h3>
+                <p class="team-links">
+                  <a href="https://github.com/shenalferdin" target="_blank" rel="noopener noreferrer">GitHub</a>
+                </p>
+              </div>
+            </li>
+
+            <li>
+              <span class="team-number">06</span>
+              <div>
+                <h3>Alessio Parolini</h3>
+                <p class="team-links">
+                  <a href="https://my-code-portfolio-ten.vercel.app/" target="_blank"
+                    rel="noopener noreferrer">Portfolio</a>
+                  <a href="https://github.com/alessioparolini2011/" target="_blank" rel="noopener noreferrer">GitHub</a>
+                </p>
+              </div>
+            </li>
+          </ol>
+
+          <a class="button button-outline" href="./app.html">
+            Return to the explorer
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M4 12h16m-6-6 6 6-6 6"></path>
+            </svg>
+          </a>
+        </section>
+
+      </div>
+    </div>
+  </main>
+  <footer class="site-footer">
+    <div class="page-width">
+      <div class="footer-top">
+        <div class="footer-identity">
+          <a class="footer-wordmark" href="./index.html">RED ODYSSEY</a>
+          <p>Martian Terrain Explorer</p>
+          <span>NASA Space Apps Challenge 2026</span>
+        </div>
+        <nav aria-label="Footer navigation">
+          <a href="./app.html">Explorer <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M4 12h16m-6-6 6 6-6 6"></path>
+            </svg></a>
+          <a href="./project.html">Documentation <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M4 12h16m-6-6 6 6-6 6"></path>
+            </svg></a>
+          <a href="./project.html#team">The team <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M4 12h16m-6-6 6 6-6 6"></path>
+            </svg></a>
         </nav>
-        <div class="project-article">
-          <section id="overview" class="document-section" aria-labelledby="overview-title">
-            <span class="section-index">01 / PROJECT OVERVIEW</span>
-            <h2 id="overview-title">Making terrain<br>understandable.</h2>
-            <p class="lead">A map shows where things are. A terrain explorer helps us ask what lies between them.</p>
-            <p>Red Odyssey is an educational WebGIS project for exploring a region of Mars through orbital imagery, topography and scientific context. Its goal is to bring visual interpretation and terrain-aware route exploration into a single, accessible interface.</p>
-            <p>Planetary imagery, elevation products and derived analyses often live in separate tools. The proposed atlas brings those perspectives together so learners can inspect a location, compare layers and understand how the landscape might influence a route.</p>
-            <aside class="editorial-note">
-              <strong>
-                Where the project stands
-              </strong>
-              <p>The OpenLayers frontend and layer adapters are implemented. The current map is an abstract local workspace. No planetary datasets, terrain measurements or Python routing service are connected yet.</p>
-            </aside>
-          </section>
-          <section id="how-it-works" class="document-section" aria-labelledby="workflow-title">
-            <span class="section-index">02 / HOW IT WORKS</span>
-            <h2 id="workflow-title">From observation<br>to exploration.</h2>
-            <p>The workflow below describes the intended data pipeline. Only the frontend and integration interfaces are currently implemented.</p>
-            <ol class="workflow">
-              <li>
-                <span class="workflow-number">01</span>
-                <div>
-                  <h3>Planetary observations</h3>
-                  <p>Select and verify appropriate NASA / PDS imagery and elevation products.</p>
-                </div>
-                <span class="workflow-state">Planned</span>
-              </li>
-              <li>
-                <span class="workflow-number">02</span>
-                <div>
-                  <h3>QGIS &amp; Python processing</h3>
-                  <p>Align coordinate systems, prepare raster tiles and derive topographic products.</p>
-                </div>
-                <span class="workflow-state">Planned</span>
-              </li>
-              <li>
-                <span class="workflow-number">03</span>
-                <div>
-                  <h3>WebGIS layers</h3>
-                  <p>Connect verified GeoJSON and XYZ exports through the layer registry.</p>
-                </div>
-                <span class="workflow-state">Adapters ready</span>
-              </li>
-              <li>
-                <span class="workflow-number">04</span>
-                <div>
-                  <h3>OpenLayers explorer</h3>
-                  <p>Navigate, select locations and manage multiple map layers.</p>
-                </div>
-                <span class="workflow-state implemented">Implemented</span>
-              </li>
-              <li>
-                <span class="workflow-number">05</span>
-                <div>
-                  <h3>Python routing service</h3>
-                  <p>Evaluate terrain costs and return route geometry through FastAPI.</p>
-                </div>
-                <span class="workflow-state">Planned</span>
-              </li>
-            </ol>
-          </section>
-          <section id="maps-layers" class="document-section layer-catalog" aria-labelledby="catalog-title">
-            <span class="section-index">03 / MAPS &amp; LAYERS</span>
-            <h2 id="catalog-title">One landscape.<br>Eight ways to read it.</h2>
-            <p class="catalog-intro">Observations, derived terrain products and algorithmic results have different meanings. Their provenance and limits belong alongside the map.</p>
-            <p class="catalog-status">No scientific datasets are connected in this release.</p>
-            <div id="layer-catalog">
-              <article class="catalog-entry" data-layer="imagery">
-                <div class="catalog-entry-heading">
-                  <span class="catalog-number">01</span>
-                  <div>
-                    <span class="catalog-category">Original observation</span>
-                    <h3>Orbital Imagery</h3>
-                  </div>
-                  <span class="catalog-availability">Pending integration</span>
-                </div>
-                <p>An orbital view of the surface, providing visual context for landforms and scientific locations.</p>
-                <details>
-                  <summary>Scientific notes &amp; provenance <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></summary>
-                  <dl>
-                    <div>
-                      <dt>Scientific purpose</dt>
-                      <dd>Relate terrain products to visible surface features.</dd>
-                    </div>
-                    <div>
-                      <dt>Data source</dt>
-                      <dd>To be documented</dd>
-                    </div>
-                    <div>
-                      <dt>Resolution</dt>
-                      <dd>To be documented</dd>
-                    </div>
-                    <div>
-                      <dt>Units</dt>
-                      <dd>To be documented</dd>
-                    </div>
-                    <div>
-                      <dt>Limitations</dt>
-                      <dd>Interpretation depends on illumination, acquisition conditions and image resolution. Imagery alone does not measure elevation.</dd>
-                    </div>
-                  </dl>
-                </details>
-              </article>
-              <article class="catalog-entry" data-layer="elevation">
-                <div class="catalog-entry-heading">
-                  <span class="catalog-number">02</span>
-                  <div>
-                    <span class="catalog-category">Elevation product</span>
-                    <h3>Digital Elevation Model</h3>
-                  </div>
-                  <span class="catalog-availability">Pending integration</span>
-                </div>
-                <p>A gridded representation of surface elevation, intended to be the foundation of the terrain analysis.</p>
-                <details>
-                  <summary>Scientific notes &amp; provenance <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></summary>
-                  <dl>
-                    <div>
-                      <dt>Scientific purpose</dt>
-                      <dd>Support elevation inspection, relief analysis and derived terrain products.</dd>
-                    </div>
-                    <div>
-                      <dt>Data source</dt>
-                      <dd>To be documented</dd>
-                    </div>
-                    <div>
-                      <dt>Resolution</dt>
-                      <dd>To be documented</dd>
-                    </div>
-                    <div>
-                      <dt>Units</dt>
-                      <dd>To be documented</dd>
-                    </div>
-                    <div>
-                      <dt>Limitations</dt>
-                      <dd>Vertical reference, horizontal spacing and uncertainty must be verified. Small hazards may lie below the dataset resolution.</dd>
-                    </div>
-                  </dl>
-                </details>
-              </article>
-              <article class="catalog-entry" data-layer="hillshade">
-                <div class="catalog-entry-heading">
-                  <span class="catalog-number">03</span>
-                  <div>
-                    <span class="catalog-category">Derived product</span>
-                    <h3>Hillshade</h3>
-                  </div>
-                  <span class="catalog-availability">Pending integration</span>
-                </div>
-                <p>A shaded-relief rendering calculated from a verified DEM and a documented illumination model.</p>
-                <details>
-                  <summary>Scientific notes &amp; provenance <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></summary>
-                  <dl>
-                    <div>
-                      <dt>Scientific purpose</dt>
-                      <dd>Make the shape of the landscape easier to interpret.</dd>
-                    </div>
-                    <div>
-                      <dt>Data source</dt>
-                      <dd>To be documented</dd>
-                    </div>
-                    <div>
-                      <dt>Resolution</dt>
-                      <dd>To be documented</dd>
-                    </div>
-                    <div>
-                      <dt>Units</dt>
-                      <dd>To be documented</dd>
-                    </div>
-                    <div>
-                      <dt>Limitations</dt>
-                      <dd>Synthetic illumination is not a surface photograph or an independent height measurement. Lighting parameters remain to be documented.</dd>
-                    </div>
-                  </dl>
-                </details>
-              </article>
-              <article class="catalog-entry" data-layer="slope">
-                <div class="catalog-entry-heading">
-                  <span class="catalog-number">04</span>
-                  <div>
-                    <span class="catalog-category">Derived product</span>
-                    <h3>Slope Map</h3>
-                  </div>
-                  <span class="catalog-availability">Pending integration</span>
-                </div>
-                <p>A local gradient product calculated from elevation differences and horizontal spacing.</p>
-                <details>
-                  <summary>Scientific notes &amp; provenance <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></summary>
-                  <dl>
-                    <div>
-                      <dt>Scientific purpose</dt>
-                      <dd>Identify areas of steeper terrain and inform a future route-cost model.</dd>
-                    </div>
-                    <div>
-                      <dt>Data source</dt>
-                      <dd>To be documented</dd>
-                    </div>
-                    <div>
-                      <dt>Resolution</dt>
-                      <dd>To be documented</dd>
-                    </div>
-                    <div>
-                      <dt>Units</dt>
-                      <dd>To be documented</dd>
-                    </div>
-                    <div>
-                      <dt>Limitations</dt>
-                      <dd>Output depends on processing method, DEM resolution and units. No slope values or thresholds have been calculated for this release.</dd>
-                    </div>
-                  </dl>
-                </details>
-              </article>
-              <article class="catalog-entry" data-layer="contours">
-                <div class="catalog-entry-heading">
-                  <span class="catalog-number">05</span>
-                  <div>
-                    <span class="catalog-category">Derived product</span>
-                    <h3>Contour Lines</h3>
-                  </div>
-                  <span class="catalog-availability">Pending integration</span>
-                </div>
-                <p>Lines connecting equal elevations, generated from the verified elevation product.</p>
-                <details>
-                  <summary>Scientific notes &amp; provenance <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></summary>
-                  <dl>
-                    <div>
-                      <dt>Scientific purpose</dt>
-                      <dd>Communicate relief and changes in surface form at a readable map scale.</dd>
-                    </div>
-                    <div>
-                      <dt>Data source</dt>
-                      <dd>To be documented</dd>
-                    </div>
-                    <div>
-                      <dt>Resolution</dt>
-                      <dd>To be documented</dd>
-                    </div>
-                    <div>
-                      <dt>Units</dt>
-                      <dd>To be documented</dd>
-                    </div>
-                    <div>
-                      <dt>Limitations</dt>
-                      <dd>Contour interval and vertical reference are not yet defined. Interpolated lines do not imply additional source accuracy.</dd>
-                    </div>
-                  </dl>
-                </details>
-              </article>
-              <article class="catalog-entry" data-layer="difficulty">
-                <div class="catalog-entry-heading">
-                  <span class="catalog-number">06</span>
-                  <div>
-                    <span class="catalog-category">Derived classification</span>
-                    <h3>Terrain Difficulty Zones</h3>
-                  </div>
-                  <span class="catalog-availability">Pending integration</span>
-                </div>
-                <p>A planned classification of relative topographic difficulty using documented terrain variables.</p>
-                <details>
-                  <summary>Scientific notes &amp; provenance <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></summary>
-                  <dl>
-                    <div>
-                      <dt>Scientific purpose</dt>
-                      <dd>Explain how terrain characteristics could affect route choices.</dd>
-                    </div>
-                    <div>
-                      <dt>Data source</dt>
-                      <dd>To be documented</dd>
-                    </div>
-                    <div>
-                      <dt>Resolution</dt>
-                      <dd>To be documented</dd>
-                    </div>
-                    <div>
-                      <dt>Units</dt>
-                      <dd>To be documented</dd>
-                    </div>
-                    <div>
-                      <dt>Limitations</dt>
-                      <dd>Variables, thresholds and weights are not yet selected. This classification will not certify safety or rover traversability.</dd>
-                    </div>
-                  </dl>
-                </details>
-              </article>
-              <article class="catalog-entry" data-layer="sites">
-                <div class="catalog-entry-heading">
-                  <span class="catalog-number">07</span>
-                  <div>
-                    <span class="catalog-category">Reference features</span>
-                    <h3>Scientific Points of Interest</h3>
-                  </div>
-                  <span class="catalog-availability">Pending integration</span>
-                </div>
-                <p>Verified locations with scientific context and traceable source attributes.</p>
-                <details>
-                  <summary>Scientific notes &amp; provenance <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></summary>
-                  <dl>
-                    <div>
-                      <dt>Scientific purpose</dt>
-                      <dd>Connect spatial exploration with the geological or research significance of a location.</dd>
-                    </div>
-                    <div>
-                      <dt>Data source</dt>
-                      <dd>To be documented</dd>
-                    </div>
-                    <div>
-                      <dt>Resolution</dt>
-                      <dd>To be documented</dd>
-                    </div>
-                    <div>
-                      <dt>Units</dt>
-                      <dd>To be documented</dd>
-                    </div>
-                    <div>
-                      <dt>Limitations</dt>
-                      <dd>No sites have been selected or imported. Location accuracy and interpretation must follow each source record.</dd>
-                    </div>
-                  </dl>
-                </details>
-              </article>
-              <article class="catalog-entry" data-layer="routes">
-                <div class="catalog-entry-heading">
-                  <span class="catalog-number">08</span>
-                  <div>
-                    <span class="catalog-category">Algorithm output</span>
-                    <h3>Calculated Routes</h3>
-                  </div>
-                  <span class="catalog-availability">Pending integration</span>
-                </div>
-                <p>Paths intended to be generated by a future Python service between user-selected endpoints.</p>
-                <details>
-                  <summary>Scientific notes &amp; provenance <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></summary>
-                  <dl>
-                    <div>
-                      <dt>Scientific purpose</dt>
-                      <dd>Explore the relationship between terrain costs and possible routes.</dd>
-                    </div>
-                    <div>
-                      <dt>Data source</dt>
-                      <dd>To be documented</dd>
-                    </div>
-                    <div>
-                      <dt>Resolution</dt>
-                      <dd>To be documented</dd>
-                    </div>
-                    <div>
-                      <dt>Units</dt>
-                      <dd>To be documented</dd>
-                    </div>
-                    <div>
-                      <dt>Limitations</dt>
-                      <dd>No routing algorithm is connected. A computed path will depend on the documented model and cannot establish operational safety.</dd>
-                    </div>
-                  </dl>
-                </details>
-              </article>
-            </div>
-          </section>
-          <section id="terrain-analysis" class="document-section" aria-labelledby="terrain-title">
-            <span class="section-index">04 / TERRAIN ANALYSIS</span>
-            <h2 id="terrain-title">Reading the shape<br>of the surface.</h2>
-            <p>A verified Digital Elevation Model will provide the foundation for the planned terrain analysis. Processing methods, units and uncertainty must be documented before measurements are exposed in the explorer.</p>
-            <dl class="analysis-definitions">
-              <div>
-                <dt>Elevation &amp; relief</dt>
-                <dd>Inspect surface height relative to the dataset’s documented vertical reference and evaluate elevation changes between locations.</dd>
-              </div>
-              <div>
-                <dt>Slope</dt>
-                <dd>Derive local gradients using the DEM’s actual horizontal spacing and vertical units. Coarse resolution can conceal small obstacles.</dd>
-              </div>
-              <div>
-                <dt>Morphology</dt>
-                <dd>Read landforms through elevation, illumination and contours. A hillshade is an interpretation aid, not a photograph.</dd>
-              </div>
-              <div>
-                <dt>Topographic difficulty</dt>
-                <dd>Combine selected terrain variables into a documented classification. Variables, thresholds and weights have not yet been defined.</dd>
-              </div>
-            </dl>
-            <aside class="editorial-note warning-note">
-              <strong>
-                Difficulty is not a safety certification.
-              </strong>
-              <p>A terrain classification cannot establish route safety, rover traversability or operational suitability. This educational project does not model every surface, vehicle or environmental constraint.</p>
-            </aside>
-          </section>
-          <section id="route-planning" class="document-section" aria-labelledby="routing-title">
-            <span class="section-index">05 / ROUTE PLANNING</span>
-            <h2 id="routing-title">Between two points,<br>the terrain matters.</h2>
-            <p>The intended workflow begins with a starting point and a destination. A Python service will use verified terrain products and a documented cost model to evaluate candidate paths. No definitive algorithm or cost function has been selected.</p>
-            <div class="route-explanation">
-              <span class="route-letter">A</span>
-              <div>
-                <h3>Define the question</h3>
-                <p>Place endpoints in the configured map projection. Today, endpoint selection operates only in abstract local coordinates.</p>
-              </div>
-            </div>
-            <div class="route-explanation">
-              <span class="route-letter">↳</span>
-              <div>
-                <h3>Evaluate the terrain</h3>
-                <p>The planned backend will evaluate terrain costs. Comparing alternative paths is a future possibility, not an implemented feature.</p>
-              </div>
-            </div>
-            <div class="route-explanation">
-              <span class="route-letter">B</span>
-              <div>
-                <h3>Interpret the result</h3>
-                <p>The frontend is prepared to display route GeoJSON and explicitly supplied metrics. No route, distance or elevation profile is currently calculated.</p>
-              </div>
-            </div>
-            <p class="technical-caption">Integration boundary: JavaScript request → FastAPI service → Python processing → route GeoJSON in a declared CRS.</p>
-          </section>
-          <section id="technologies" class="document-section" aria-labelledby="technologies-title">
-            <span class="section-index">06 / TECHNOLOGIES</span>
-            <h2 id="technologies-title">A focused toolset.</h2>
-            <dl class="technology-list">
-              <div>
-                <dt>OpenLayers</dt>
-                <dd>Map rendering, interactions and geospatial layer management.</dd>
-                <dd class="technology-status">In use</dd>
-              </div>
-              <div>
-                <dt>JavaScript</dt>
-                <dd>Native ES Modules, shared page components and application state.</dd>
-                <dd class="technology-status">In use</dd>
-              </div>
-              <div>
-                <dt>Vite</dt>
-                <dd>Local development and a three-page production build.</dd>
-                <dd class="technology-status">In use</dd>
-              </div>
-              <div>
-                <dt>QGIS</dt>
-                <dd>Planned preparation, inspection and export of planetary datasets.</dd>
-                <dd class="technology-status">Planned</dd>
-              </div>
-              <div>
-                <dt>Python</dt>
-                <dd>Planned terrain processing and route-cost analysis.</dd>
-                <dd class="technology-status">Planned</dd>
-              </div>
-              <div>
-                <dt>FastAPI</dt>
-                <dd>Planned interface between the explorer and Python routing.</dd>
-                <dd class="technology-status">Planned</dd>
-              </div>
-            </dl>
-          </section>
-          <section id="sources" class="document-section" aria-labelledby="sources-title">
-            <span class="section-index">07 / DATA SOURCES &amp; CREDITS</span>
-            <h2 id="sources-title">Every layer needs<br>a traceable source.</h2>
-            <p>No planetary GIS dataset is distributed or used by the explorer in this release. The landing photograph is an editorial image, separate from the map. Dataset identifiers, instruments, product versions, licenses, resolutions and processing histories will be recorded here after selection and verification.</p>
-            <div class="source-register">
-              <span>Dataset reference register</span>
-              <strong>
-                To be documented
-              </strong>
-            </div>
-            <p>NASA and the Planetary Data System are intended reference portals, not a claim that a particular product has been integrated. No NASA approval, certification or endorsement is implied.</p>
-            <aside id="photography" class="photography-credit">
-              <span class="section-index">LANDING PHOTOGRAPH / PIA21042</span>
-              <h3>Farewell to Murray Buttes.</h3>
-              <p>Curiosity’s Mastcam photographed these layered outcrops on September 8, 2016 (sol 1454). Credit: NASA/JPL-Caltech/MSSS. The landing uses a cropped, web-optimized copy with a restrained warm treatment and contrast overlay for text legibility. No terrain has been generated or added.</p>
-              <a href="https://science.nasa.gov/resource/farewell-to-murray-buttes-image-2/" target="_blank" rel="noopener noreferrer">Original image &amp; NASA credits <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16m-6-6 6 6-6 6"></path></svg><span class="visually-hidden"> (opens in a new tab)</span></a>
-            </aside>
-            <div class="reference-links" id="reference-links">
-              <a href="https://science.nasa.gov/mars/" target="_blank" rel="noopener noreferrer">NASA · Mars exploration <svg class="icon external-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16m-6-6 6 6-6 6"></path></svg><span class="visually-hidden"> (opens in a new tab)</span></a>
-              <a href="https://pds.nasa.gov/" target="_blank" rel="noopener noreferrer">NASA · Planetary Data System <svg class="icon external-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16m-6-6 6 6-6 6"></path></svg><span class="visually-hidden"> (opens in a new tab)</span></a>
-            </div>
-            <p class="technical-caption">Typography: IBM Plex Sans Condensed and Inter, distributed locally under their accompanying font licenses.</p>
-          </section>
-          <section id="team" class="document-section team-section" aria-labelledby="team-title">
-            <span class="section-index">08 / THE TEAM</span>
-            <h2 id="team-title">Six people.<br>A shared field of view.</h2>
-            <p>Names, roles and contact details will be published here when confirmed by the team.</p>
-            <ol id="team-list" class="team-list">
-              <li>
-                <span class="team-number">01</span>
-                <div>
-                  <h3>Team member</h3>
-                  <p>To be documented</p>
-                </div>
-              </li>
-              <li>
-                <span class="team-number">02</span>
-                <div>
-                  <h3>Team member</h3>
-                  <p>To be documented</p>
-                </div>
-              </li>
-              <li>
-                <span class="team-number">03</span>
-                <div>
-                  <h3>Team member</h3>
-                  <p>To be documented</p>
-                </div>
-              </li>
-              <li>
-                <span class="team-number">04</span>
-                <div>
-                  <h3>Team member</h3>
-                  <p>To be documented</p>
-                </div>
-              </li>
-              <li>
-                <span class="team-number">05</span>
-                <div>
-                  <h3>Team member</h3>
-                  <p>To be documented</p>
-                </div>
-              </li>
-              <li>
-                <span class="team-number">06</span>
-                <div>
-                  <h3>Team member</h3>
-                  <p>To be documented</p>
-                </div>
-              </li>
-            </ol>
-            <a class="button button-outline" href="./app.html">Return to the explorer <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16m-6-6 6 6-6 6"></path></svg></a>
-          </section>
+        <div class="footer-contact">
+          <span class="footer-label">FOLLOW THE PROJECT</span>
+          <a href="https://github.com/nczeta/red-odyssey" target="_blank"
+            rel="noopener noreferrer">
+            GitHub ↗
+          </a>
         </div>
       </div>
-    </main>
-    <footer class="site-footer">
-      <div class="page-width">
-        <div class="footer-top">
-          <div class="footer-identity">
-            <a class="footer-wordmark" href="./index.html">RED ODYSSEY</a>
-            <p>Martian Terrain Explorer</p>
-            <span>NASA Space Apps Challenge 2026</span>
-          </div>
-          <nav aria-label="Footer navigation">
-            <a href="./app.html">Explorer <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16m-6-6 6 6-6 6"></path></svg></a>
-            <a href="./project.html">Documentation <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16m-6-6 6 6-6 6"></path></svg></a>
-            <a href="./project.html#team">The team <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16m-6-6 6 6-6 6"></path></svg></a>
-          </nav>
-          <div class="footer-contact">
-            <span class="footer-label">FOLLOW THE PROJECT</span>
-            <span class="unconfigured-link">GitHub <span class="unconfigured-label">URL not yet provided</span></span>
-            <span class="contact-pending">Team contacts to be confirmed.</span>
-          </div>
-        </div>
-        <div class="footer-bottom">
-          <p>Independent educational project. No NASA endorsement implied.</p>
-          <a href="./project.html#sources">Sources &amp; credits <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16m-6-6 6 6-6 6"></path></svg></a>
-        </div>
+      <div class="footer-bottom">
+        <p>Independent educational project. No NASA endorsement implied.</p>
+        <a href="./project.html#sources">Sources &amp; credits <svg class="icon" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4 12h16m-6-6 6 6-6 6"></path>
+          </svg></a>
       </div>
-    </footer>
-    <script type="module" src="/src/project.js"></script>
-  </body>
+    </div>
+  </footer>
+  <script type="module" src="/src/project.js"></script>
+
+</body>
+
 </html>

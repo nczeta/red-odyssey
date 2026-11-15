@@ -117,7 +117,7 @@ test('XYZ uses the explicit local CRS and dataset tile extent, not Earth default
   assert.equal(layer.getSource().getWrapX(), false);
   assert.equal(layer.getSource().getTileGrid().getMaxZoom(), 3);
   await assert.rejects(() => createLayer({ ...config, extent: null }, CRS), /extent or tile grid/);
-  await assert.rejects(() => createLayer({ ...config, type: 'cog' }, CRS), /not implemented/);
+  await assert.rejects(() => createLayer({ ...config, type: 'unsupported' }, CRS), /not implemented/);
 });
 
 test('raster state follows tile completion and surfaces failures', async () => {

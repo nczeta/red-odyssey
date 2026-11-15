@@ -10,7 +10,7 @@ import { Circle as CircleStyle, Fill, Stroke, Style, Text } from 'ol/style.js';
 import { defaults as defaultInteractions } from 'ol/interaction/defaults.js';
 import Attribution from 'ol/control/Attribution.js';
 
-export function createMap(config, onSelect, onPointer) {
+export function createMap(config, onSelect) {
   config.registerProjections();
   const spatial = config.spatial;
   let projection = getProjection(spatial.code);
@@ -19,7 +19,7 @@ export function createMap(config, onSelect, onPointer) {
     addProjection(projection);
   }
   if (!projection) throw new Error(`Register the verified projection ${spatial.code} in config/app.js first.`);
-  const view = new View({ projection, center: spatial.center, zoom: spatial.zoom, minZoom: spatial.minZoom, maxZoom: spatial.maxZoom, extent: spatial.extent, showFullExtent: true });
+  const view = new View({ projection, center: spatial.center, zoom: spatial.zoom, minZoom: spatial.minZoom, maxZoom: spatial.maxZoom, maxResolution: spatial.maxResolution, minResolution: spatial.minResolution, extent: spatial.extent, constrainOnlyCenter: !spatial.local, showFullExtent: true });
   const technical = new VectorSource({ wrapX: false });
   if (spatial.local) {
     const [minX, minY, maxX, maxY] = spatial.extent;
@@ -42,7 +42,6 @@ export function createMap(config, onSelect, onPointer) {
     const hit = map.forEachFeatureAtPixel(event.pixel, (feature, layer) => ({ feature, layer }), { layerFilter: layer => Boolean(layer.get('registryId')), hitTolerance: 6 });
     onSelect(event.coordinate, hit);
   });
-  map.on('pointermove', event => { if (!event.dragging) onPointer(event.coordinate); });
   const target = document.querySelector('#map');
   target.addEventListener('keydown', event => {
     if (event.key === 'Enter') { event.preventDefault(); onSelect(view.getCenter()); }
@@ -51,10 +50,19 @@ export function createMap(config, onSelect, onPointer) {
     if (!event.target.closest('button, input, a')) target.focus({ preventScroll: true });
   });
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
-  const zoom = delta => view.animate({ zoom: Math.max(spatial.minZoom, Math.min(spatial.maxZoom, view.getZoom() + delta)), duration: motion.matches ? 0 : 180 });
+  const zoom = delta => view.animate({ zoom: Math.max(view.getMinZoom(), Math.min(view.getMaxZoom(), view.getZoom() + delta)), duration: motion.matches ? 0 : 180 });
   document.querySelector('#zoom-in').addEventListener('click', () => zoom(1));
   document.querySelector('#zoom-out').addEventListener('click', () => zoom(-1));
-  document.querySelector('#reset-view').addEventListener('click', () => view.animate({ center: spatial.center, zoom: spatial.zoom, rotation: 0, duration: motion.matches ? 0 : 220 }));
+  const fitCoverage = (duration = 0) => {
+    view.setRotation(0);
+    view.fit(spatial.extent, { size: map.getSize(), padding: [64, 48, 64, 48], duration });
+  };
+  if (!spatial.local) fitCoverage();
+  document.querySelector('#reset-view').addEventListener('click', () => {
+    const duration = motion.matches ? 0 : 220;
+    if (!spatial.local) fitCoverage(duration);
+    else view.animate({ center: spatial.center, zoom: spatial.zoom, rotation: 0, duration });
+  });
   let frame;
   const updateSize = () => {
     cancelAnimationFrame(frame);

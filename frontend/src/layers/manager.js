@@ -7,6 +7,9 @@ import { createXYZ } from 'ol/tilegrid.js';
 import GeoJSON from 'ol/format/GeoJSON.js';
 import { get as getProjection, getTransformFromProjections } from 'ol/proj.js';
 import { Style, Stroke, Fill, Circle as CircleStyle } from 'ol/style.js';
+import { createCogLayer } from './cog.js';
+import { createContourLayer } from './contours.js';
+import { createGeologyLayer } from './geology.js';
 
 export function spatialPair(crs, viewCrs) {
   if (!crs) throw new Error('A source CRS must be configured explicitly.');
@@ -37,6 +40,17 @@ export function readGeoJSON(data, crs, viewCrs) {
 
 export async function createLayer(config, viewCrs, fetcher = fetch) {
   const { source } = spatialPair(config.crs, viewCrs);
+  if (config.type === 'cog') return createCogLayer(config, source);
+  if (['contours', 'geology'].includes(config.type)) {
+    const urls = config.type === 'contours' ? [config.vectorUrl] : config.vectors?.map(vector => vector.url);
+    if (!urls?.length || urls.some(url => !url)) throw new Error('A GeoJSON URL is required for each vector layer.');
+    const datasets = await Promise.all(urls.map(async url => {
+      const response = await fetcher(url);
+      if (!response.ok) throw new Error(`Vector request failed (HTTP ${response.status}).`);
+      return readGeoJSON(await response.json(), config.crs, viewCrs);
+    }));
+    return config.type === 'contours' ? createContourLayer(config, source, datasets[0]) : createGeologyLayer(config, source, datasets);
+  }
   if (config.type === 'geojson') {
     let data = config.data;
     if (!data) {
@@ -64,7 +78,7 @@ export async function createLayer(config, viewCrs, fetcher = fetch) {
       attributions: config.attribution || undefined,
     }) });
   }
-  throw new Error(`Adapter not implemented: ${config.type}. GeoTIFF/COG support is planned.`);
+  throw new Error(`Adapter not implemented: ${config.type}.`);
 }
 
 export class LayerManager extends EventTarget {
@@ -80,7 +94,7 @@ export class LayerManager extends EventTarget {
     if (!config.id || this.entries.has(config.id)) throw new Error(`Missing or duplicate layer ID: ${config.id}.`);
     this.entries.set(config.id, {
       config: { visible: true, opacity: 1, order: this.entries.size, ...config },
-      layer: null, state: 'unavailable', error: null,
+      layer: null, state: config.lazy && config.sourceUrl ? 'configured' : 'unavailable', error: null,
     });
   }
   notify() { this.dispatchEvent(new Event('change')); }
@@ -99,23 +113,23 @@ export class LayerManager extends EventTarget {
     try {
       const layer = await createLayer(entry.config, this.viewCrs, this.fetcher);
       entry.layer = layer;
+      if (layer.get('legend')) entry.config.legend = layer.get('legend');
       layer.set('registryId', id);
       layer.setVisible(entry.config.visible);
       layer.setOpacity(entry.config.opacity);
       layer.setZIndex(entry.config.order);
       if (entry.config.extent) {
         // Extents are only applied as view clipping when already in the view CRS.
-        if (entry.config.crs === this.viewCrs) layer.setExtent(entry.config.extent);
+        if (entry.config.crs === this.viewCrs) layer.setExtent(layer.get('renderExtent') || entry.config.extent);
       }
-      this.map.addLayer(layer);
-      if (entry.config.type === 'xyz') {
+      if (['xyz', 'cog', 'contours', 'geology'].includes(entry.config.type)) {
         entry.state = 'loading';
-        const source = layer.getSource();
+        const source = layer.get('rasterSource') || layer.getSource();
         let failed = false;
         source.on('tileloaderror', () => {
           failed = true;
           entry.state = 'error';
-          entry.error = 'One or more tiles could not be loaded. Check URL, CRS and CORS.';
+          entry.error = 'One or more tiles could not be loaded. Check URL, CRS, HTTP range support and CORS.';
           this.notify();
         });
         source.on('tileloadend', () => {
@@ -124,6 +138,8 @@ export class LayerManager extends EventTarget {
         // A hidden raster cannot trigger tile requests; its adapter is configured but unverified.
         if (!entry.config.visible) entry.state = 'configured';
       } else entry.state = 'ready';
+      // Install tile listeners before the first render can request data.
+      this.map.addLayer(layer);
     } catch (error) {
       entry.state = 'error';
       entry.error = error.message;
@@ -132,10 +148,20 @@ export class LayerManager extends EventTarget {
   }
   setVisible(id, visible) {
     const entry = this.get(id);
-    if (!entry.layer) return;
+    if (!entry.layer && !entry.config.lazy) return;
+    const mapTypes = ['xyz', 'cog', 'contours', 'geology'];
+    if (visible && mapTypes.includes(entry.config.type)) {
+      for (const [otherId, other] of this.entries) {
+        if (otherId !== id && mapTypes.includes(other.config.type) && (entry.config.exclusiveMap || other.config.exclusiveMap)) {
+          other.config.visible = false;
+          other.layer?.setVisible(false);
+        }
+      }
+    }
     entry.config.visible = Boolean(visible);
-    entry.layer.setVisible(entry.config.visible);
+    entry.layer?.setVisible(entry.config.visible);
     this.notify();
+    if (!entry.layer && entry.config.visible) void this.load(id);
   }
   setOpacity(id, opacity) {
     const entry = this.get(id);
@@ -172,5 +198,5 @@ export class LayerManager extends EventTarget {
     entry.error = null;
     this.notify();
   }
-  async loadConfigured() { await Promise.all([...this.entries.keys()].map(id => this.load(id))); }
+  async loadConfigured() { await Promise.all([...this.entries].filter(([, entry]) => !entry.config.lazy || entry.config.visible).map(([id]) => this.load(id))); }
 }
